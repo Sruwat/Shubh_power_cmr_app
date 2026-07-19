@@ -24,7 +24,7 @@ const border = "#dde4eb";
 const teal = "#18b9b5";
 
 export default function Onboarding() {
-  const [step, setStep] = useState<Step>("splash");
+  const [step, setStep] = useState<Step>("language");
   const [language, setLanguage] = useState("English");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -42,6 +42,7 @@ export default function Onboarding() {
   const cameraRef = useRef<CameraView>(null);
   const [loading, setLoading] = useState(false);
   const setTokens = useAuthStore((state) => state.setTokens);
+  const setLocalProfile = useAuthStore((state) => state.setLocalProfile);
   const completeOnboarding = useAuthStore((state) => state.completeOnboarding);
 
   useEffect(() => {
@@ -83,6 +84,7 @@ export default function Onboarding() {
     try {
       const response = await api.post("/api/v1/auth/verify-otp", { phone: normalizedPhone, otp: otp.replace(/\D/g, "") });
       await setTokens(response.data.access_token, response.data.refresh_token);
+      await setLocalProfile({ phone: normalizedPhone });
       setStep("profile");
     } catch {
       Alert.alert("Code not verified", "Use demo OTP 1234 while SMS integration is in demo mode.");
@@ -108,6 +110,7 @@ export default function Onboarding() {
           profile_manually_confirmed: true
         }
       });
+      await setLocalProfile({ name, email: customerEmail.trim() || null, phone: normalizedPhone });
       setStep("location");
     } catch {
       Alert.alert("Profile not saved", "MongoDB/backend is not reachable. Please keep the backend running and try again.");
@@ -367,7 +370,7 @@ function SplashScreen() {
 function BrandHeader() {
   return (
     <View style={{ alignItems: "center" }}>
-      <BrandLogo variant="wordmark" width={106} />
+      <BrandLogo variant="wordmark" width={116} />
     </View>
   );
 }

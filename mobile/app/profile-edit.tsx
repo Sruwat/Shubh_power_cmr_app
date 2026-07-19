@@ -5,19 +5,23 @@ import { useEffect, useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import { api } from "@/api/client";
 import { BackHeader, Cta, fx, FxCard, FxInput, FxScreen, Pill } from "@/components/Futuristic";
+import { useAuthStore } from "@/store/auth";
 
 export default function ProfileEdit() {
   const queryClient = useQueryClient();
+  const localName = useAuthStore((state) => state.profileName);
+  const localEmail = useAuthStore((state) => state.profileEmail);
+  const setLocalProfile = useAuthStore((state) => state.setLocalProfile);
   const me = useQuery({ queryKey: ["me"], queryFn: async () => (await api.get("/api/v1/users/me")).data, retry: false });
-  const [name, setName] = useState("Rahul Sharma");
-  const [email, setEmail] = useState("rahul.sharma@gmail.com");
+  const [name, setName] = useState(localName ?? "");
+  const [email, setEmail] = useState(localEmail ?? "");
   const [language, setLanguage] = useState("en");
   const [pushEnabled, setPushEnabled] = useState(true);
 
   useEffect(() => {
     if (!me.data) return;
-    setName(me.data.name ?? "Rahul Sharma");
-    setEmail(me.data.email ?? "rahul.sharma@gmail.com");
+    setName(me.data.name ?? localName ?? "");
+    setEmail(me.data.email ?? localEmail ?? "");
     setLanguage(me.data.language ?? "en");
     setPushEnabled(me.data.notification_preferences?.push_enabled ?? true);
   }, [me.data]);
@@ -31,6 +35,7 @@ export default function ProfileEdit() {
       consent_flags: { profile_edit_confirmed: true }
     })).data,
     onSuccess: async () => {
+      await setLocalProfile({ name, email });
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       Alert.alert("Profile updated", "Your profile preferences are saved.");
       router.back();

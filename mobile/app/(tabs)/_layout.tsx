@@ -9,16 +9,22 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.body,
+        tabBarInactiveTintColor: "#d9e7ff",
         headerShown: false,
         tabBarStyle: {
-          height: 66 + insets.bottom,
+          height: 70 + insets.bottom,
           paddingTop: 8,
           paddingBottom: Math.max(insets.bottom, 10),
-          borderTopColor: colors.border,
-          backgroundColor: colors.surface
+          borderTopWidth: 0,
+          backgroundColor: "#151343",
+          shadowColor: "#05072d",
+          shadowOpacity: 0.18,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: -6 },
+          elevation: 12
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "700" }
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "900" },
+        tabBarItemStyle: { borderRadius: 16, marginHorizontal: 2 }
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: ({ color }) => <Ionicons name="home-outline" size={22} color={color} /> }} />

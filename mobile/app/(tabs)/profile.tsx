@@ -9,8 +9,14 @@ import { useAuthStore } from "@/store/auth";
 export default function Profile() {
   const queryClient = useQueryClient();
   const logout = useAuthStore((state) => state.logout);
+  const localName = useAuthStore((state) => state.profileName);
+  const localEmail = useAuthStore((state) => state.profileEmail);
+  const localPhone = useAuthStore((state) => state.profilePhone);
   const me = useQuery({ queryKey: ["me"], queryFn: async () => (await api.get("/api/v1/users/me")).data, retry: false });
-  const phone = me.data?.phone ?? "9876543210";
+  const displayName = me.data?.name ?? localName ?? "Shubh Power user";
+  const displayEmail = me.data?.email ?? localEmail ?? "Add email in Edit Profile";
+  const phone = me.data?.phone ?? localPhone ?? "9876543210";
+  const initials = displayName.split(" ").map((part: string) => part[0]).join("").slice(0, 2).toUpperCase() || "SP";
   const addVehicle = useMutation({
     mutationFn: async () => (await api.post("/api/v1/vehicles", { name: "Tata Nexon EV", connector_types: ["CCS2"] })).data,
     onSuccess: async () => {
@@ -29,12 +35,12 @@ export default function Profile() {
       <EnergyCard style={{ backgroundColor: fx.blue2 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
           <View style={{ width: 62, height: 62, borderRadius: 24, backgroundColor: "#6474a0", alignItems: "center", justifyContent: "center" }}>
-            <Text style={{ color: "#fff", fontSize: 25, fontWeight: "900" }}>RS</Text>
+            <Text style={{ color: "#fff", fontSize: 25, fontWeight: "900" }}>{initials}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: "#fff", fontSize: 21, fontWeight: "900" }}>Rahul Sharma</Text>
+            <Text style={{ color: "#fff", fontSize: 21, fontWeight: "900" }}>{displayName}</Text>
             <Text style={{ color: "#dbe7ff", fontWeight: "800" }}>+91 {phone}</Text>
-            <Text style={{ color: "#b9c7ed", fontSize: 12 }}>rahul.sharma@gmail.com</Text>
+            <Text style={{ color: "#b9c7ed", fontSize: 12 }}>{displayEmail}</Text>
           </View>
           <Pressable accessibilityRole="button" accessibilityLabel="Edit profile" onPress={() => router.push("/profile-edit")}>
             <Ionicons name="create-outline" size={24} color="#fff" />

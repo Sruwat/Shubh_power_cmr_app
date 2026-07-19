@@ -43,7 +43,6 @@ export function FxHeader({ title, subtitle, right, menuPress }: { title: string;
   return (
     <View style={styles.header}>
       <View style={{ flex: 1 }}>
-        <BrandLogo variant="wordmark" width={92} />
         <Text style={styles.title}>{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
@@ -104,7 +103,7 @@ export function BrandLogo({ variant = "wordmark", width = 92 }: { variant?: "wor
     <Image
       source={require("../../assets/shubh-power-wordmark.png")}
       resizeMode="contain"
-      style={{ width, height: width * 0.66 }}
+      style={{ width, height: width * 0.72 }}
     />
   );
 }

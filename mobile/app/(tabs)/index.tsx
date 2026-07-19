@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { StationMap } from "@/components/StationMap";
-import { BrandLogo, CircleButton, Cta, EnergyCard, fx, FxScreen, Pill, SearchBar } from "@/components/Futuristic";
+import { CircleButton, Cta, fx, FxScreen, Pill, SearchBar } from "@/components/Futuristic";
 import { stations as demoStations } from "@/data/experience";
 import { useNearbyStations } from "@/features/useStations";
 import { useStationFilters } from "@/store/stationFilters";
@@ -25,7 +25,6 @@ export default function Home() {
         <View style={{ position: "absolute", top: 16, left: 16, right: 16, gap: 10 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <View style={{ flex: 1 }}>
-              <BrandLogo variant="wordmark" width={96} />
               <Text style={{ color: fx.ink, fontSize: 29, lineHeight: 33, fontWeight: "900" }}>Find a charger</Text>
               <Text style={{ color: fx.muted, fontSize: 13, fontWeight: "800" }}>{locationLabel}</Text>
             </View>
