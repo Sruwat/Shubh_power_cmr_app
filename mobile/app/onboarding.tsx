@@ -42,6 +42,7 @@ export default function Onboarding() {
   const cameraRef = useRef<CameraView>(null);
   const [loading, setLoading] = useState(false);
   const setTokens = useAuthStore((state) => state.setTokens);
+  const completeOnboarding = useAuthStore((state) => state.completeOnboarding);
 
   useEffect(() => {
     if (step !== "splash") return;
@@ -137,9 +138,15 @@ export default function Onboarding() {
           is_default: true
         });
       }
+      await completeOnboarding();
       router.replace("/(tabs)");
-    } catch {
-      Alert.alert("Vehicle not saved", "Backend or MongoDB is not reachable. Please keep the backend running and try again.");
+    } catch (error) {
+      if (skip) {
+        await completeOnboarding();
+        router.replace("/(tabs)");
+        return;
+      }
+      Alert.alert("Vehicle not saved", "Backend or MongoDB is not reachable. Please try again, or use Skip for now to continue the demo.");
     } finally {
       setLoading(false);
     }

@@ -54,13 +54,50 @@ export function FxHeader({ title, subtitle, right, menuPress }: { title: string;
 }
 
 export function BrandLogo({ variant = "wordmark", width = 92 }: { variant?: "wordmark" | "mark"; width?: number }) {
+  const pulse = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (variant !== "mark") return;
+    const loop = Animated.loop(Animated.sequence([
+      Animated.timing(pulse, { toValue: 1, duration: 1350, useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 0, duration: 1350, useNativeDriver: true })
+    ]));
+    loop.start();
+    return () => loop.stop();
+  }, [pulse, variant]);
+
   if (variant === "mark") {
     return (
-      <Image
-        source={require("../../assets/shubh-power-mark.png")}
-        resizeMode="contain"
-        style={{ width, height: width, borderRadius: width * 0.2 }}
-      />
+      <View style={{ width, height: width, alignItems: "center", justifyContent: "center" }}>
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            width: width * 1.18,
+            height: width * 1.18,
+            borderRadius: width * 0.59,
+            backgroundColor: "rgba(255,153,0,0.18)",
+            opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.28, 0.58] }),
+            transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.82, 1.08] }) }]
+          }}
+        />
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            width: width,
+            height: width,
+            borderRadius: width * 0.5,
+            backgroundColor: "rgba(22,143,226,0.14)",
+            opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.42, 0.16] }),
+            transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1.04, 1.24] }) }]
+          }}
+        />
+        <Image
+          source={require("../../assets/shubh-power-mark.png")}
+          resizeMode="contain"
+          style={{ width, height: width }}
+        />
+      </View>
     );
   }
   return (
