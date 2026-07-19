@@ -13,7 +13,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://replace-with-public-demo-api.example.com"
+        "EXPO_PUBLIC_API_URL": "https://shubh-power-360-api.onrender.com"
       }
     },
     "production": {
@@ -22,7 +22,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://replace-with-production-api.example.com"
+        "EXPO_PUBLIC_API_URL": "https://shubh-power-360-api.onrender.com"
       }
     }
   }
