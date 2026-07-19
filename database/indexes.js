@@ -1,0 +1,12 @@
+db.stations.createIndex({ location: "2dsphere" });
+db.stations.createIndex({ station_id: 1 }, { unique: true });
+db.stations.createIndex({ brand: 1, city: 1 });
+db.stations.createIndex({ demo_charging_enabled: 1 });
+db.connectors.createIndex({ station_id: 1 });
+db.connectors.createIndex({ demo_charger_id: 1 }, { unique: true, sparse: true });
+db.charging_sessions.createIndex({ user_id: 1, status: 1 });
+db.charging_sessions.createIndex({ session_id: 1 }, { unique: true });
+db.wallet_ledger_entries.createIndex({ user_id: 1, created_at: -1 });
+db.wallet_ledger_entries.createIndex({ reference_id: 1 }, { unique: true });
+db.payments.createIndex({ payment_id: 1 }, { unique: true });
+db.support_tickets.createIndex({ user_id: 1, created_at: -1 });

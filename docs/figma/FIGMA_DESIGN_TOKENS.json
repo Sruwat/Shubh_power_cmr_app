@@ -1,0 +1,41 @@
+{
+  "colors": {
+    "appBackground": "#F4F8FB",
+    "surface": "#FFFFFF",
+    "navy": "#171542",
+    "primary": "#168ED8",
+    "teal": "#27C4B4",
+    "textPrimary": "#171542",
+    "textSecondary": "#5F6378",
+    "border": "#DEE5EA",
+    "softBlue": "#E6F5FD",
+    "softTeal": "#E6FBF7"
+  },
+  "typography": {
+    "display": { "size": 32, "lineHeight": 38, "weight": "900" },
+    "h1": { "size": 28, "lineHeight": 34, "weight": "900" },
+    "h2": { "size": 22, "lineHeight": 28, "weight": "900" },
+    "body": { "size": 16, "lineHeight": 24, "weight": "500" },
+    "caption": { "size": 13, "lineHeight": 18, "weight": "700" },
+    "tab": { "size": 11, "lineHeight": 14, "weight": "800" }
+  },
+  "spacing": {
+    "screenX": 20,
+    "sectionGap": 24,
+    "cardPadding": 18,
+    "rowGap": 12
+  },
+  "radius": {
+    "control": 18,
+    "card": 22,
+    "sheet": 26,
+    "pill": 999
+  },
+  "sizing": {
+    "searchHeight": 58,
+    "buttonHeight": 56,
+    "chipHeight": 38,
+    "bottomNavMinHeight": 68,
+    "iconButton": 48
+  }
+}

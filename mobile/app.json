@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Shubh Power",
+    "slug": "shubh-power-360",
+    "scheme": "shubhpower",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/shubh-power-mark.png",
+    "platforms": ["android", "ios"],
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/shubh-power-wordmark.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f2f7fc"
+    },
+    "newArchEnabled": true,
+    "android": {
+      "package": "com.shubhpower.evcharging",
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "CAMERA"]
+    },
+    "ios": {
+      "bundleIdentifier": "com.shubhpower.evcharging",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Shubh Power uses your location to find nearby compatible chargers.",
+        "NSCameraUsageDescription": "Shubh Power uses the camera to scan charger QR codes."
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-location",
+      "expo-camera"
+    ],
+    "extra": {
+      "apiUrl": "auto"
+    }
+  }
+}

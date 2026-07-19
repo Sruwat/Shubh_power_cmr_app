@@ -1,0 +1,14 @@
+# Figma vs Current App Gap Audit
+
+This audit is based on the user-supplied Android screenshots plus direct browser capture outputs in `docs/evidence/figma-reference/`.
+
+| Screen | Layout Differences | Typography Differences | Color / Spacing Differences | Missing Visual Elements | Missing Interactions | Remediation |
+|---|---|---|---|---|---|---|
+| Onboarding | Current flow reuses a generic card pattern. Figma uses distinct setup steps with icon/logo emphasis and tighter form proportions. | Current headings are close but inconsistent across steps. | Current cards create large empty lower space. | Splash animation, OTP cells, richer progress/setup states. | Language/payment/location need stronger stateful selection. | Rebuild onboarding as a step-specific native state machine. |
+| Home | Current home still relies on a large dark card and simple lists. | Station titles wrap too heavily. | White background dominates; density is low. | Complete station metadata, provider identity, ratings, connector availability, tariff. | Filters/search need real result count and applied state. | Replace station data presentation and card layout with compact Figma-style cards. |
+| Map | Map is closer but bottom sheet/list states are shallow. | Sheet text hierarchy is not measured. | Floating controls need exact dimensions and layering. | Cluster states, expanded sheet, saved state. | Search this area, filters, list, save must update data. | Rebuild map overlay components and bottom sheet. |
+| Station Detail | Current back button is too large and screen remains card-stacked. | Title is oversized in hero and weak in lower sections. | Excessive white card repetition. | Hero/location, amenities, connector rows, tariff/fee detail. | Save/share/support/start flow needs full journey. | Replace with structured detail page and compact nav control. |
+| Scan / Charging | Current scan is form-forward below permission card. | Permission body contrast was weak. | Camera area/card spacing differs from Figma. | Connector selection, tariff confirmation, payment step, active progress visual, completion summary. | Manual code should move through validation/payment/session screens. | Add charging journey routes and stateful backend calls. |
+| Activity / Wallet | Current starts empty, weak for demos. | Wallet amount dominates without transaction context. | Low density and too many empty panels. | Seeded sessions, invoices, transactions, refunds, support tickets. | Tabs need real filtering. | Add presentation demo activity data and tabbed sections. |
+| Profile | Current menus are generic rows. | Menu text weights too heavy and undifferentiated. | Basic card grouping only. | Vehicle cards, saved stations, payment methods, notification toggles. | Every row needs a route or modal. | Build profile subroutes and remove dead rows. |
+
