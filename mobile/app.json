@@ -1,12 +1,15 @@
 {
   "expo": {
     "name": "Shubh Power",
-    "slug": "shubh-power-360",
+    "slug": "subhpower360",
     "scheme": "shubhpower",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/shubh-power-mark.png",
-    "platforms": ["android", "ios"],
+    "platforms": [
+      "android",
+      "ios"
+    ],
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/shubh-power-wordmark.png",
@@ -16,7 +19,11 @@
     "newArchEnabled": true,
     "android": {
       "package": "com.shubhpower.evcharging",
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "CAMERA"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA"
+      ]
     },
     "ios": {
       "bundleIdentifier": "com.shubhpower.evcharging",
@@ -32,7 +39,12 @@
       "expo-camera"
     ],
     "extra": {
-      "apiUrl": "auto"
-    }
+      "apiUrl": "auto",
+      "router": {},
+      "eas": {
+        "projectId": "abb23728-1db1-4969-b442-61efce7fbb83"
+      }
+    },
+    "owner": "snsarswats-team"
   }
 }
