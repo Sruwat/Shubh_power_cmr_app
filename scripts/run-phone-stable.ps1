@@ -8,6 +8,14 @@ $ErrorActionPreference = "Stop"
 
 function Get-ShubhLanIp {
   if ($LanIp) {
+    $activeIps = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
+      Where-Object { $_.IPAddress -and $_.IPAddress -notlike "127.*" -and $_.IPAddress -notlike "169.254*" } |
+      Select-Object -ExpandProperty IPAddress
+
+    if ($activeIps -notcontains $LanIp) {
+      throw "The manual LAN IP '$LanIp' is not active on this laptop now. Active IPv4 addresses: $($activeIps -join ', '). Run .\scripts\run-phone-stable.ps1 without -LanIp, or pass the current Wi-Fi IP."
+    }
+
     return [PSCustomObject]@{
       IPAddress = $LanIp
       InterfaceAlias = "Manual override"
