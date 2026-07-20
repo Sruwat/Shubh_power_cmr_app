@@ -1,5 +1,7 @@
 param(
-  [string]$LanIp = ""
+  [string]$LanIp = "",
+  [string]$ApiUrl = "https://shubh-power-360-api.onrender.com",
+  [switch]$UseLocalBackend
 )
 
 $ErrorActionPreference = "Stop"
@@ -84,6 +86,7 @@ function Stop-PortListeners($port) {
 $Root = Split-Path -Parent $PSScriptRoot
 $Mobile = Join-Path $Root "mobile"
 $BackendLocal = "http://127.0.0.1:8010"
+$BundleProbePath = "/index.bundle?platform=android&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.bytecode=1"
 $UiRebuildMarker = "Figma-reference UI rebuild: active"
 
 & "$PSScriptRoot\stop-mobile-metro.ps1"
@@ -125,44 +128,57 @@ if ($connectionProfile -and $connectionProfile.NetworkCategory -ne "Private") {
   Write-Host ""
 }
 
-$localHealth = Test-JsonHealth "$BackendLocal/api/v1/health"
-if (!$localHealth.Ok) {
-  Write-Host "Backend local: Not running"
-  if ($localHealth.Error) {
-    Write-Host "Backend local reason: $($localHealth.Error)"
-  }
-  Stop-PortListeners 8010
-  Start-Sleep -Seconds 2
-  Write-Host "Starting FastAPI on 0.0.0.0:8010"
-  $backendLog = Join-Path $Root "backend-phone-8010.log"
-  $backendErrLog = Join-Path $Root "backend-phone-8010.err.log"
-  Remove-Item -LiteralPath $backendLog, $backendErrLog -Force -ErrorAction SilentlyContinue
-  Start-Process -FilePath "cmd.exe" -ArgumentList "/c","set REQUIRE_MONGODB=false&& `"$Root\.venv\Scripts\python.exe`" -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8010 > `"$backendLog`" 2> `"$backendErrLog`"" -WorkingDirectory $Root -WindowStyle Hidden
-  Start-Sleep -Seconds 8
+if ($UseLocalBackend) {
   $localHealth = Test-JsonHealth "$BackendLocal/api/v1/health"
-}
-
-if (!$localHealth.Ok) {
-  $backendErrLog = Join-Path $Root "backend-phone-8010.err.log"
-  if (Test-Path $backendErrLog) {
-    Write-Host "Backend startup error log:"
-    Get-Content -LiteralPath $backendErrLog -Tail 40
+  if (!$localHealth.Ok) {
+    Write-Host "Backend local: Not running"
+    if ($localHealth.Error) {
+      Write-Host "Backend local reason: $($localHealth.Error)"
+    }
+    Stop-PortListeners 8010
+    Start-Sleep -Seconds 2
+    Write-Host "Starting FastAPI on 0.0.0.0:8010"
+    $backendLog = Join-Path $Root "backend-phone-8010.log"
+    $backendErrLog = Join-Path $Root "backend-phone-8010.err.log"
+    Remove-Item -LiteralPath $backendLog, $backendErrLog -Force -ErrorAction SilentlyContinue
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/c","set REQUIRE_MONGODB=false&& `"$Root\.venv\Scripts\python.exe`" -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8010 > `"$backendLog`" 2> `"$backendErrLog`"" -WorkingDirectory $Root -WindowStyle Hidden
+    Start-Sleep -Seconds 8
+    $localHealth = Test-JsonHealth "$BackendLocal/api/v1/health"
   }
-  throw "Backend local: FAILED. Start it manually with: uvicorn backend.app.main:app --host 0.0.0.0 --port 8010"
-}
 
-$mongoStatus = if ($localHealth.Data.database_connected) { "Connected" } else { "Disconnected" }
+  if (!$localHealth.Ok) {
+    $backendErrLog = Join-Path $Root "backend-phone-8010.err.log"
+    if (Test-Path $backendErrLog) {
+      Write-Host "Backend startup error log:"
+      Get-Content -LiteralPath $backendErrLog -Tail 40
+    }
+    throw "Backend local: FAILED. Start it manually with: uvicorn backend.app.main:app --host 0.0.0.0 --port 8010"
+  }
 
-Write-Host "Backend local: OK"
-Write-Host "Backend phone route: Metro proxy /api -> $BackendLocal"
-Write-Host "MongoDB Atlas: $mongoStatus"
-Write-Host "Station count: $($localHealth.Data.station_count)"
+  $mongoStatus = if ($localHealth.Data.database_connected) { "Connected" } else { "Disconnected" }
+  $ApiUrl = "auto"
 
-$listeners = Get-NetTCPConnection -LocalPort 8010 -State Listen -ErrorAction SilentlyContinue
-if ($listeners) {
-  Write-Host "Port 8010 listener: OK"
+  Write-Host "Backend local: OK"
+  Write-Host "Backend phone route: Metro proxy /api -> $BackendLocal"
+  Write-Host "MongoDB Atlas: $mongoStatus"
+  Write-Host "Station count: $($localHealth.Data.station_count)"
+
+  $listeners = Get-NetTCPConnection -LocalPort 8010 -State Listen -ErrorAction SilentlyContinue
+  if ($listeners) {
+    Write-Host "Port 8010 listener: OK"
+  } else {
+    Write-Host "Port 8010 listener: Not detected"
+  }
 } else {
-  Write-Host "Port 8010 listener: Not detected"
+  $renderHealth = Test-JsonHealth "$ApiUrl/api/v1/health"
+  if (!$renderHealth.Ok) {
+    throw "Render backend is not reachable from this laptop: $ApiUrl/api/v1/health. Error: $($renderHealth.Error)"
+  }
+  $mongoStatus = if ($renderHealth.Data.database_connected) { "Connected" } else { "Disconnected" }
+  Write-Host "Backend public: OK"
+  Write-Host "Backend URL for phone: $ApiUrl"
+  Write-Host "MongoDB Atlas: $mongoStatus"
+  Write-Host "Station count: $($renderHealth.Data.station_count)"
 }
 
 Remove-Item Env:EXPO_OFFLINE -ErrorAction SilentlyContinue
@@ -170,19 +186,23 @@ Remove-Item Env:EXPO_OFFLINE -ErrorAction SilentlyContinue
 $env:EXPO_NO_DEPENDENCY_VALIDATION = "1"
 $env:EXPO_PACKAGER_HOSTNAME = "$lanIp"
 $env:REACT_NATIVE_PACKAGER_HOSTNAME = "$lanIp"
-$env:EXPO_PUBLIC_API_BASE_URL = "auto"
+$env:EXPO_PUBLIC_API_BASE_URL = $ApiUrl
 $env:SHUBH_BACKEND_HOST = "127.0.0.1"
 $env:SHUBH_BACKEND_PORT = "8010"
 
 Write-Host ""
-Write-Host "API URL for phone: auto via Metro proxy"
-Write-Host "Backend local test: $BackendLocal/api/v1/health"
+Write-Host "API URL for phone: $ApiUrl"
 Write-Host "Metro status URL: http://$lanIp`:8081/status"
-Write-Host "Metro API proxy test after Metro starts: http://$lanIp`:8081/api/v1/health"
+Write-Host "Metro bundle test after Metro starts: http://$lanIp`:8081$BundleProbePath"
+if ($UseLocalBackend) {
+  Write-Host "Metro API proxy test after Metro starts: http://$lanIp`:8081/api/v1/health"
+}
 Write-Host ""
 Write-Host "Before scanning, open this on the PHONE browser:"
 Write-Host "  http://$lanIp`:8081/status"
 Write-Host "It must show: packager-status:running"
+Write-Host "Then open this on the PHONE browser. It should download/show bundle text, not fail:"
+Write-Host "  http://$lanIp`:8081$BundleProbePath"
 Write-Host ""
 Write-Host "If phone browser cannot open the Metro URLs, run this as Administrator:"
 Write-Host "  cd $Root"

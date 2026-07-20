@@ -31,11 +31,19 @@ try {
 
 netsh advfirewall firewall delete rule name="Shubh Expo Metro 8081" | Out-Null
 netsh advfirewall firewall delete rule name="Shubh FastAPI 8010" | Out-Null
+netsh advfirewall firewall delete rule name="Shubh Expo Node Program" | Out-Null
 
 netsh advfirewall firewall add rule name="Shubh Expo Metro 8081" dir=in action=allow protocol=TCP localport=8081 profile=private,public | Out-Null
 netsh advfirewall firewall add rule name="Shubh FastAPI 8010" dir=in action=allow protocol=TCP localport=8010 profile=private,public | Out-Null
 
-Write-Host "Firewall rules added for TCP 8081 and 8010."
+$nodePath = (Get-Command node.exe -ErrorAction SilentlyContinue).Source
+if ($nodePath) {
+  netsh advfirewall firewall add rule name="Shubh Expo Node Program" dir=in action=allow program="$nodePath" enable=yes profile=private,public | Out-Null
+  Write-Host "Firewall rules added for TCP 8081, TCP 8010, and Node.js: $nodePath"
+} else {
+  Write-Host "Firewall rules added for TCP 8081 and 8010. Node.js was not found on PATH, so no program rule was added."
+}
+
 Write-Host "Now run from normal PowerShell:"
 Write-Host "  cd C:\Users\shank\Documents\CRM\shubh-power-360-platform"
 if ($wifiIp) {
