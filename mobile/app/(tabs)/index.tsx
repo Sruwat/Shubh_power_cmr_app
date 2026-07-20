@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { StationMap } from "@/components/StationMap";
-import { CircleButton, Cta, fx, FxScreen, Pill, SearchBar } from "@/components/Futuristic";
+import { CircleButton, Cta, fx, FxScreen, HeaderLogoBadge, Pill, SearchBar } from "@/components/Futuristic";
 import { stations as demoStations } from "@/data/experience";
 import { useNearbyStations } from "@/features/useStations";
 import { useStationFilters } from "@/store/stationFilters";
@@ -28,7 +28,7 @@ export default function Home() {
               <Text style={{ color: fx.ink, fontSize: 29, lineHeight: 33, fontWeight: "900" }}>Find a charger</Text>
               <Text style={{ color: fx.muted, fontSize: 13, fontWeight: "800" }}>{locationLabel}</Text>
             </View>
-            <Image source={require("../../assets/shubh-power-mark.png")} resizeMode="contain" style={{ width: 34, height: 34 }} />
+            <HeaderLogoBadge compact />
             <CircleButton icon="menu-outline" label="Open menu" onPress={() => router.push("/menu")} />
             <CircleButton icon="notifications-outline" label="Notifications" onPress={() => router.push("/notifications")} />
           </View>

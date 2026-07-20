@@ -47,9 +47,17 @@ export function FxHeader({ title, subtitle, right, menuPress }: { title: string;
         <Text style={styles.title}>{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
-      <BrandLogo variant="mark" width={34} />
+      <HeaderLogoBadge />
       {right}
       {menuPress ? <CircleButton icon="menu-outline" onPress={menuPress} label="Open menu" /> : null}
+    </View>
+  );
+}
+
+export function HeaderLogoBadge({ compact = false }: { compact?: boolean }) {
+  return (
+    <View style={[styles.headerLogoBadge, compact && styles.headerLogoBadgeCompact]}>
+      <BrandLogo variant="wordmark" width={compact ? 70 : 82} />
     </View>
   );
 }
@@ -116,7 +124,7 @@ export function BackHeader({ title, onBack, right }: { title: string; onBack: ()
       <CircleButton icon="chevron-back" onPress={onBack} label="Back" />
       <Text style={styles.backTitle}>{title}</Text>
       <View style={{ marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 8 }}>
-        <BrandLogo variant="mark" width={30} />
+        <HeaderLogoBadge compact />
         {right}
       </View>
     </View>
@@ -247,6 +255,8 @@ export const styles = StyleSheet.create({
   subtitle: { color: fx.muted, fontSize: 14, lineHeight: 20, fontWeight: "700" },
   backHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14 },
   backTitle: { color: fx.ink, fontSize: 17, fontWeight: "900" },
+  headerLogoBadge: { minWidth: 92, height: 50, borderRadius: 15, backgroundColor: "rgba(255,255,255,0.96)", borderWidth: 1.5, borderColor: "rgba(89,210,254,0.75)", alignItems: "center", justifyContent: "center", shadowColor: fx.blue, shadowOpacity: 0.16, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
+  headerLogoBadgeCompact: { minWidth: 78, height: 42, borderRadius: 13 },
   circleButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: fx.card, borderWidth: 1, borderColor: fx.line, alignItems: "center", justifyContent: "center" },
   circleButtonDark: { backgroundColor: "rgba(255,255,255,0.16)", borderColor: "rgba(255,255,255,0.18)" },
   card: { backgroundColor: fx.card, borderRadius: 16, borderWidth: 1, borderColor: fx.line, padding: 18, gap: 12, shadowColor: "#0b1b33", shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 },

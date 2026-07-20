@@ -3,7 +3,7 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { Cta, EnergyCard, fx, FxCard, FxInput, FxScreen } from "@/components/Futuristic";
+import { Cta, EnergyCard, fx, FxCard, FxInput, FxScreen, HeaderLogoBadge } from "@/components/Futuristic";
 
 export default function Scan() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -11,8 +11,13 @@ export default function Scan() {
 
   return (
     <FxScreen>
-      <Text style={{ color: fx.ink, fontSize: 30, lineHeight: 36, fontWeight: "900" }}>Scan charger</Text>
-      <Text style={{ color: fx.muted, fontSize: 14, fontWeight: "700", marginTop: -8 }}>Point your camera at the QR code on the charger</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: fx.ink, fontSize: 30, lineHeight: 36, fontWeight: "900" }}>Scan charger</Text>
+          <Text style={{ color: fx.muted, fontSize: 14, fontWeight: "700", marginTop: -2 }}>Point your camera at the QR code on the charger</Text>
+        </View>
+        <HeaderLogoBadge compact />
+      </View>
 
       {permission?.granted ? (
         <View style={{ height: 330, overflow: "hidden", borderRadius: 20, backgroundColor: fx.navy }}>

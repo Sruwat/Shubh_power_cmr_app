@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { Station, distanceLabel } from "@/api/client";
 import { StationMap } from "@/components/StationMap";
-import { CircleButton, Cta, fx, Pill, SearchBar } from "@/components/Futuristic";
+import { CircleButton, Cta, fx, HeaderLogoBadge, Pill, SearchBar } from "@/components/Futuristic";
 import { stations as demoStations } from "@/data/experience";
 import { useNearbyStations } from "@/features/useStations";
 import { openGoogleMapsDirections } from "@/utils/maps";
@@ -24,6 +24,9 @@ export default function MapScreen() {
       <StationMap coords={coords} stations={stations} onSelect={setSelected} />
 
       <View style={{ position: "absolute", top: 18, left: 16, right: 16, gap: 10 }}>
+        <View style={{ alignItems: "flex-end" }}>
+          <HeaderLogoBadge compact />
+        </View>
         <SearchBar placeholder="Search this area" onPress={() => router.push("/search")} />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 9 }}>
           <Pill label="Map" icon="map-outline" selected={!showList} onPress={() => setShowList(false)} />
