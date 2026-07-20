@@ -61,6 +61,7 @@ export type Station = {
   google_maps_url?: string;
   coordinates: { latitude: number; longitude: number };
   max_power_kw?: number;
+  access_type?: string;
   area?: string;
   address?: string;
   pricePerKwh?: number;
@@ -77,6 +78,7 @@ export type Station = {
   idleFee?: string;
   hours?: string;
   paymentMethods?: string[];
+  reviews?: Array<{ name: string; rating: number; comment: string; vehicle?: string; time?: string }>;
   data_source?: "presentation_demo" | "research";
 };
 

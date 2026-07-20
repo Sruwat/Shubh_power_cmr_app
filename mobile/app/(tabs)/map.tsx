@@ -28,8 +28,8 @@ export default function MapScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 9 }}>
           <Pill label="Map" icon="map-outline" selected={!showList} onPress={() => setShowList(false)} />
           <Pill label="List" icon="list-outline" selected={showList} onPress={() => setShowList(true)} />
-          <ModePill label="Shubh only" icon="flash-outline" selected={filters.mode === "shubh"} onPress={() => filters.setMode("shubh")} />
-          <ModePill label="All" icon="layers-outline" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+          <ModePill label="All EV" icon="layers-outline" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+          <ModePill label="Shubh Power" icon="flash-outline" selected={filters.mode === "shubh"} onPress={() => filters.setMode("shubh")} />
           <ModePill label="Private Hub" icon="business-outline" selected={filters.mode === "private"} onPress={() => filters.setMode("private")} />
           <Pill label="Fast DC" icon="flash-outline" selected={filters.minPowerKw >= 25} />
           <Pill label={filters.connectorType} selected={filters.compatibleOnly} onPress={filters.toggleCompatibleOnly} />

@@ -7,14 +7,18 @@ from backend.app.api.v1.router import router
 from backend.app.core.config import get_settings
 from backend.app.db.mongo import close_mongo, connect_mongo, mongo_state
 from backend.app.repositories.memory import store
-from backend.app.services.stations import import_station_csv
+from backend.app.services.stations import import_station_csv, import_station_seed_json, upsert_station_seed_json
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if not store.stations:
-        import_station_csv(get_settings().station_source_csv)
+        imported = import_station_seed_json()
+        if imported == 0:
+            import_station_csv(get_settings().station_source_csv)
     await connect_mongo()
+    if mongo_state.connected:
+        await upsert_station_seed_json()
     yield
     await close_mongo()
 

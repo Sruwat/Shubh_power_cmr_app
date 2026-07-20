@@ -1,4 +1,5 @@
 import { Station } from "@/api/client";
+import importedStations from "@/data/importedStations.json";
 import { stations as curatedStations } from "@/data/experience";
 
 export type PresentationStation = Station & {
@@ -18,42 +19,56 @@ export type PresentationStation = Station & {
   idleFee: string;
   hours: string;
   paymentMethods: string[];
+  reviews?: Array<{ name: string; rating: number; comment: string; vehicle?: string; time?: string }>;
   data_source: "presentation_demo" | "research";
 };
 
 export function withPresentation(station: Station, index = 0): PresentationStation {
-  const row = curatedStations[index % curatedStations.length];
-  const isDemo = station.demo_charging_enabled || index < curatedStations.length;
-  const source = isDemo ? row : station;
+  const imported = (importedStations as Station[]).find((item) => item.id === station.id || item.name === station.name);
+  const row = imported ?? curatedStations[index % curatedStations.length];
+  const source = { ...row, ...station };
+  const isDemo = Boolean(imported || station.demo_charging_enabled || station.data_source === "presentation_demo");
   return {
     ...station,
-    name: isDemo ? row.name : station.name,
-    brand: isDemo ? row.brand : station.brand,
+    name: station.name || row.name,
+    brand: station.brand || row.brand,
     stationCategory: source.stationCategory,
     societyName: source.societyName,
     locality: source.locality,
     isPrivateHub: source.isPrivateHub,
     isShubhHub: source.isShubhHub,
-    area: isDemo ? row.area : station.area || station.name,
-    address: isDemo ? row.address : station.address || station.name,
-    coordinates: isDemo ? row.coordinates : station.coordinates,
-    google_maps_url: isDemo ? row.google_maps_url : station.google_maps_url,
-    pricePerKwh: isDemo ? row.pricePerKwh : station.pricePerKwh ?? 18,
-    powerLabel: isDemo ? row.powerLabel : station.powerLabel ?? "Power updating",
-    availabilityLabel: isDemo ? row.availabilityLabel : station.availabilityLabel ?? "Limited data",
-    trustScore: isDemo ? row.trustScore : station.trustScore ?? 70,
-    rating: isDemo ? row.rating : station.rating ?? 4.0,
-    reviewCount: isDemo ? row.reviewCount : station.reviewCount ?? 0,
-    etaMin: isDemo ? row.etaMin : station.etaMin ?? Math.max(8, Math.round((station.distance_km ?? 3) * 4)),
-    amenities: isDemo ? row.amenities : station.amenities ?? ["Public access"],
-    connectorDetails: isDemo ? row.connectorDetails : station.connectorDetails ?? [{ id: station.demo_charger_id ?? "CP01", type: "CCS2", power: "Updating", status: "Check at station" }],
-    parkingFee: isDemo ? row.parkingFee : station.parkingFee ?? "Check at station",
-    platformFee: isDemo ? row.platformFee : station.platformFee ?? 0,
-    idleFee: isDemo ? row.idleFee : station.idleFee ?? "Check at station",
-    hours: isDemo ? row.hours : station.hours ?? "Open Now",
-    paymentMethods: isDemo ? row.paymentMethods : station.paymentMethods ?? ["Shubh Power Wallet", "UPI", "Credit / Debit Card"],
+    access_type: source.access_type,
+    area: station.area || row.area || station.name,
+    address: station.address || row.address || station.name,
+    coordinates: station.coordinates || row.coordinates,
+    google_maps_url: station.google_maps_url || row.google_maps_url,
+    pricePerKwh: station.pricePerKwh ?? row.pricePerKwh ?? 18,
+    powerLabel: station.powerLabel ?? row.powerLabel ?? "Power updating",
+    availabilityLabel: station.availabilityLabel ?? row.availabilityLabel ?? "Limited data",
+    trustScore: station.trustScore ?? row.trustScore ?? 70,
+    rating: station.rating ?? row.rating ?? 4.0,
+    reviewCount: station.reviewCount ?? row.reviewCount ?? 0,
+    etaMin: station.etaMin ?? row.etaMin ?? Math.max(8, Math.round((station.distance_km ?? 3) * 4)),
+    amenities: station.amenities ?? row.amenities ?? ["Public access"],
+    connectorDetails: station.connectorDetails ?? row.connectorDetails ?? [{ id: station.demo_charger_id ?? "CP01", type: "CCS2", power: "Updating", status: "Check at station" }],
+    parkingFee: station.parkingFee ?? row.parkingFee ?? "Check at station",
+    platformFee: station.platformFee ?? row.platformFee ?? 0,
+    idleFee: station.idleFee ?? row.idleFee ?? "Check at station",
+    hours: station.hours ?? row.hours ?? "Open Now",
+    paymentMethods: station.paymentMethods ?? row.paymentMethods ?? ["Shubh Power Wallet", "UPI", "Credit / Debit Card"],
+    reviews: station.reviews ?? row.reviews ?? seededReviews(station.name || row.name),
     data_source: isDemo ? "presentation_demo" : "research"
   };
+}
+
+export const importedStationFallback = importedStations as Station[];
+
+function seededReviews(stationName: string) {
+  return [
+    { name: "Nikhil D.", rating: 5, time: "3 days ago", vehicle: "Tata Nexon EV", comment: `${stationName} was easy to find and the connector flow was smooth.` },
+    { name: "Vikas Bhola", rating: 4, time: "4 days ago", vehicle: "Mahindra XEV 9e", comment: "Good parking access and the tariff was clear before charging." },
+    { name: "Priya S.", rating: 5, time: "Last week", vehicle: "MG ZS EV", comment: "Reliable app guidance, QR scan and payment confirmation worked well." }
+  ];
 }
 
 export const walletTransactions = [

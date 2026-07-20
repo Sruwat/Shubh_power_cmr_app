@@ -5,6 +5,10 @@ import { useStationFilters } from "@/store/stationFilters";
 
 const connectors = ["CCS2", "Type 2", "CHAdeMO", "Bharat AC001", "Bharat DC001", "15A Socket"];
 const ratings = ["3+", "3.5+", "4+", "4.5+"];
+const brands = ["All", "Shubh Power", "Tata Power", "Statiq", "Jio-bp", "Adani", "SUN Mobility"];
+const accessTypes = ["All", "public", "private", "mall", "society"];
+const powerRatings = [0, 7, 22, 30, 50, 60];
+const verification = ["All", "High", "Medium", "pending"];
 
 export default function Filters() {
   const filters = useStationFilters();
@@ -18,15 +22,24 @@ export default function Filters() {
       <FxCard>
         <Text style={{ color: fx.ink, fontWeight: "900" }}>Station Network</Text>
         <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
-          <Pill label="Shubh EV Charging Points" selected={filters.mode === "shubh"} tone="teal" onPress={() => filters.setMode("shubh")} />
-          <Pill label="All Integrated Stations" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+          <Pill label="All EV" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+          <Pill label="Shubh Power" selected={filters.mode === "shubh"} tone="teal" onPress={() => filters.setMode("shubh")} />
           <Pill label="Private Charging Hub" selected={filters.mode === "private"} tone="violet" onPress={() => filters.setMode("private")} />
         </View>
+      </FxCard>
+      <FxCard>
+        <Text style={{ color: fx.ink, fontWeight: "900" }}>Brand / Operator</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{brands.map((item) => <Pill key={item} label={item} selected={filters.brand === item} onPress={() => filters.setBrand(item)} />)}</View>
+      </FxCard>
+      <FxCard>
+        <Text style={{ color: fx.ink, fontWeight: "900" }}>Access Type</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{accessTypes.map((item) => <Pill key={item} label={item === "All" ? "All access" : item} selected={filters.accessType === item} onPress={() => filters.setAccessType(item)} />)}</View>
       </FxCard>
       <FxCard>
         <Text style={{ color: fx.ink, fontWeight: "900" }}>Availability</Text>
         <Pill label="Available Now" selected={filters.availableOnly} onPress={filters.toggleAvailableOnly} />
         <Pill label={`Compatible with My Car - Tata Nexon EV (${filters.connectorType})`} selected={filters.compatibleOnly} tone="teal" onPress={filters.toggleCompatibleOnly} />
+        <Pill label="Demo charging enabled" selected={filters.demoOnly} tone="violet" onPress={filters.toggleDemoOnly} />
       </FxCard>
       <FxCard>
         <Text style={{ color: fx.ink, fontWeight: "900" }}>Connector Type</Text>
@@ -35,6 +48,14 @@ export default function Filters() {
       <FxCard>
         <Text style={{ color: fx.ink, fontWeight: "900" }}>Minimum Rating</Text>
         <View style={{ flexDirection: "row", gap: 8 }}>{ratings.map((item) => <View key={item} style={{ flex: 1 }}><Pill label={item} selected={`${filters.minRating}+` === item} onPress={() => filters.setMinRating(Number(item.replace("+", "")))} /></View>)}</View>
+      </FxCard>
+      <FxCard>
+        <Text style={{ color: fx.ink, fontWeight: "900" }}>Power</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{powerRatings.map((kw) => <Pill key={kw} label={kw === 0 ? "Any power" : `${kw}+ kW`} selected={filters.minPowerKw === kw} onPress={() => filters.setMinPowerKw(kw)} />)}</View>
+      </FxCard>
+      <FxCard>
+        <Text style={{ color: fx.ink, fontWeight: "900" }}>Verification</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{verification.map((item) => <Pill key={item} label={item} selected={filters.verificationStatus === item} onPress={() => filters.setVerificationStatus(item)} />)}</View>
       </FxCard>
       <FxCard>
         <Text style={{ color: fx.ink, fontWeight: "900" }}>Sort By</Text>

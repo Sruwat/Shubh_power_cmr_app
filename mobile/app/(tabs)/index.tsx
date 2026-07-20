@@ -36,8 +36,8 @@ export default function Home() {
           <SearchBar onPress={() => router.push("/search")} placeholder="Search station or area..." />
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 9 }}>
-            <ModePill label="Shubh EV Charging Points" icon="flash-outline" selected={filters.mode === "shubh"} onPress={() => filters.setMode("shubh")} />
-            <ModePill label="All Integrated Stations" icon="layers-outline" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+            <ModePill label="All EV" icon="layers-outline" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+            <ModePill label="Shubh Power" icon="flash-outline" selected={filters.mode === "shubh"} onPress={() => filters.setMode("shubh")} />
             <ModePill label="Private Charging Hub" icon="business-outline" selected={filters.mode === "private"} onPress={() => filters.setMode("private")} />
             <Pill label="Available" selected={filters.availableOnly} onPress={filters.toggleAvailableOnly} />
             <Pill label={filters.connectorType} selected={filters.compatibleOnly} onPress={filters.toggleCompatibleOnly} />

@@ -32,6 +32,7 @@ export function StationMap({ coords, stations, onSelect }: { coords: { latitude:
           </Pressable>
         );
       })}
+      <Text style={{ position: "absolute", right: 10, bottom: 8, color: "rgba(22,22,63,0.56)", fontSize: 10, fontWeight: "800" }}>© OpenStreetMap contributors</Text>
     </View>
   );
 }

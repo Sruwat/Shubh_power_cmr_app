@@ -5,6 +5,8 @@ import { Text, TextInput, View } from "react-native";
 import { BackHeader, fx, FxCard, FxScreen, ListRow, Pill } from "@/components/Futuristic";
 import { StationCard } from "@/components/StationCard";
 import { stations } from "@/data/experience";
+import { importedStationFallback } from "@/data/presentation";
+import { applyStationFilters } from "@/features/useStations";
 import { useStationFilters } from "@/store/stationFilters";
 
 export default function SearchScreen() {
@@ -12,16 +14,9 @@ export default function SearchScreen() {
   const filters = useStationFilters();
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return stations
-      .filter((station) => {
-        if (filters.mode === "all") return true;
-        if (filters.mode === "private") return station.stationCategory === "private" || station.isPrivateHub || Boolean(station.societyName);
-        return station.stationCategory === "shubh" || station.isShubhHub || station.brand.toLowerCase().includes("shubh") || station.name.toLowerCase().includes("shubh");
-      })
-      .filter((station) => !filters.compatibleOnly || station.connector_summary.join(" ").toLowerCase().includes(filters.connectorType.toLowerCase()))
-      .filter((station) => !filters.availableOnly || !station.availabilityLabel.toLowerCase().includes("busy"))
+    return applyStationFilters([...importedStationFallback, ...stations], filters)
       .filter((station) => !q || `${station.name} ${station.area} ${station.brand} ${station.societyName ?? ""}`.toLowerCase().includes(q));
-  }, [filters.availableOnly, filters.compatibleOnly, filters.connectorType, filters.mode, query]);
+  }, [filters, query]);
 
   return (
     <FxScreen>
@@ -36,8 +31,8 @@ export default function SearchScreen() {
       </FxCard>
       <Text style={{ color: fx.faint, fontSize: 12, fontWeight: "900" }}>ALL NEARBY STATIONS</Text>
       <View style={{ flexDirection: "row", gap: 9, flexWrap: "wrap" }}>
-        <Pill label="Shubh only" selected={filters.mode === "shubh"} tone="teal" onPress={() => filters.setMode("shubh")} />
-        <Pill label="All stations" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+        <Pill label="All EV" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+        <Pill label="Shubh Power" selected={filters.mode === "shubh"} tone="teal" onPress={() => filters.setMode("shubh")} />
         <Pill label="Private hubs" selected={filters.mode === "private"} tone="violet" onPress={() => filters.setMode("private")} />
         <Pill label={filters.connectorType} selected={filters.compatibleOnly} onPress={filters.toggleCompatibleOnly} />
         <Pill label="Available" selected={filters.availableOnly} onPress={filters.toggleAvailableOnly} />

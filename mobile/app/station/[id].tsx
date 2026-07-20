@@ -12,6 +12,7 @@ import { openGoogleMapsDirections } from "@/utils/maps";
 export default function StationDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [preference, setPreference] = useState<"time" | "amount" | "units">("time");
+  const [tab, setTab] = useState<"info" | "chargers" | "reviews">("info");
   const fallback = stations.find((station) => station.id === id) ?? selectedStation;
   const station = useQuery({
     queryKey: ["station", id],
@@ -55,56 +56,153 @@ export default function StationDetail() {
       </EnergyCard>
 
       <View style={{ flexDirection: "row", gap: 8 }}>
-        <Pill label="Info" selected />
-        <Pill label="Chargers" />
-        <Pill label="Reviews" />
+        <Pill label="Info" selected={tab === "info"} onPress={() => setTab("info")} />
+        <Pill label="Chargers" selected={tab === "chargers"} onPress={() => setTab("chargers")} />
+        <Pill label="Reviews" selected={tab === "reviews"} onPress={() => setTab("reviews")} />
       </View>
 
-      <FxCard>
-        <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Charging options</Text>
-        <View style={{ flexDirection: "row", gap: 12 }}>
-          <StatTile label="Power" value={item.powerLabel || "50 kW"} />
-          <StatTile label="Tariff" value={`Rs ${item.pricePerKwh ?? 18}`} tone="teal" />
-        </View>
-        <Text style={{ color: fx.muted, lineHeight: 22 }}>Charging available. Connector and price details may be updated by the station before charging starts.</Text>
-        <Text style={{ color: fx.ink, fontSize: 16, fontWeight: "900" }}>Charging preference</Text>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <PreferenceButton label="By time" value="30 min" selected={preference === "time"} onPress={() => setPreference("time")} />
-          <PreferenceButton label="By amount" value="Rs 500" selected={preference === "amount"} onPress={() => setPreference("amount")} />
-          <PreferenceButton label="By units" value="20 kWh" selected={preference === "units"} onPress={() => setPreference("units")} />
-        </View>
-        <Cta label="Select Connector" icon="flash-outline" onPress={() => router.push("/select-connector")} />
-      </FxCard>
+      {tab === "info" ? (
+        <>
+          <FxCard>
+            <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Charging options</Text>
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              <StatTile label="Power" value={item.powerLabel || "50 kW"} />
+              <StatTile label="Tariff" value={`Rs ${item.pricePerKwh ?? 18}`} tone="teal" />
+            </View>
+            <Text style={{ color: fx.muted, lineHeight: 22 }}>Charging available. Connector and price details may be updated by the station before charging starts.</Text>
+            <Text style={{ color: fx.ink, fontSize: 16, fontWeight: "900" }}>Charging preference</Text>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <PreferenceButton label="By time" value="30 min" selected={preference === "time"} onPress={() => setPreference("time")} />
+              <PreferenceButton label="By amount" value="Rs 500" selected={preference === "amount"} onPress={() => setPreference("amount")} />
+              <PreferenceButton label="By units" value="20 kWh" selected={preference === "units"} onPress={() => setPreference("units")} />
+            </View>
+            <Cta label="Select Connector" icon="flash-outline" onPress={() => setTab("chargers")} />
+          </FxCard>
 
-      <FxCard>
-        <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Location and access</Text>
-        <Text style={{ color: fx.muted, lineHeight: 22 }}>Navigation is available for this station.</Text>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-          {["Parking nearby", "Support available", "Public access"].map((label) => <Pill key={label} label={label} />)}
-        </View>
-        <Cta label="Open maps" icon="navigate-outline" kind="secondary" onPress={() => void openGoogleMapsDirections(item)} />
-      </FxCard>
+          <FxCard>
+            <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Location and access</Text>
+            <Text style={{ color: fx.muted, lineHeight: 22 }}>{item.address || "Navigation is available for this station."}</Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {(item.amenities || ["Parking nearby", "Support available", "Public access"]).map((label) => <Pill key={label} label={label} />)}
+            </View>
+            <Cta label="Open maps" icon="navigate-outline" kind="secondary" onPress={() => void openGoogleMapsDirections(item)} />
+          </FxCard>
 
-      <FxCard>
-        <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Tariff breakdown</Text>
-        <PriceRow label="Energy Rate" value={`Rs ${item.pricePerKwh}/kWh`} />
-        <PriceRow label="Platform Fee" value={`Rs ${item.platformFee} flat`} />
-        <PriceRow label="GST (18%)" value="Incl. in above" />
-        <PriceRow label="Idle Fee" value={item.idleFee} />
-        <PriceRow label="Parking" value={item.parkingFee} />
-      </FxCard>
+          <FxCard>
+            <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Tariff breakdown</Text>
+            <PriceRow label="Energy Rate" value={`Rs ${item.pricePerKwh}/kWh`} />
+            <PriceRow label="Platform Fee" value={`Rs ${item.platformFee} flat`} />
+            <PriceRow label="GST (18%)" value="Incl. in above" />
+            <PriceRow label="Idle Fee" value={item.idleFee} />
+            <PriceRow label="Parking" value={item.parkingFee} />
+          </FxCard>
 
-      <FxCard>
-        <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Before you start</Text>
-        <Text style={{ color: fx.muted, lineHeight: 22 }}>Confirm connector availability at the station, review tariff information and keep your payment method ready.</Text>
-        <Cta label="Book Charging Slot" icon="calendar-outline" onPress={() => router.push("/book-slot")} />
-        <Pressable accessibilityRole="button" onPress={() => reportIssue.mutate()} style={{ alignItems: "center", paddingVertical: 8 }}>
-          <Text style={{ color: fx.blue, fontWeight: "900" }}>Report an issue</Text>
-        </Pressable>
-      </FxCard>
+          <FxCard>
+            <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Before you start</Text>
+            <Text style={{ color: fx.muted, lineHeight: 22 }}>Confirm connector availability at the station, review tariff information and keep your payment method ready.</Text>
+            <Cta label="Book Charging Slot" icon="calendar-outline" onPress={() => router.push("/book-slot")} />
+            <Pressable accessibilityRole="button" onPress={() => reportIssue.mutate()} style={{ alignItems: "center", paddingVertical: 8 }}>
+              <Text style={{ color: fx.blue, fontWeight: "900" }}>Report an issue</Text>
+            </Pressable>
+          </FxCard>
+        </>
+      ) : null}
+
+      {tab === "chargers" ? <ChargersTab station={item} /> : null}
+      {tab === "reviews" ? <ReviewsTab station={item} /> : null}
 
       <SectionLabel>Compatible with Tata Nexon EV, MG ZS EV, BYD Atto 3, fleet vehicles</SectionLabel>
     </FxScreen>
+  );
+}
+
+function ChargersTab({ station }: { station: Station }) {
+  const [selectedConnector, setSelectedConnector] = useState(station.connectorDetails?.[0]?.id);
+  const connectors = station.connectorDetails?.length ? station.connectorDetails : [{ id: "CP01", type: "CCS2", power: station.powerLabel || "50 kW DC", status: "Ready to charge" }];
+  return (
+    <>
+      <FxCard>
+        <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Available chargers</Text>
+        <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+          <Pill label="Available" selected />
+          <Pill label="AC" />
+          <Pill label="DC" />
+        </View>
+        {connectors.map((connector) => {
+          const active = selectedConnector === connector.id;
+          const unavailable = /busy|use|disconnect|fault/i.test(connector.status);
+          return (
+            <Pressable key={connector.id} onPress={() => setSelectedConnector(connector.id)} style={{ borderRadius: 16, borderWidth: active ? 2 : 1, borderColor: active ? fx.blue : unavailable ? "#fecaca" : fx.line, backgroundColor: unavailable ? "#fff7f7" : active ? "#e7f7ff" : "#fff", padding: 14, gap: 8 }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
+                <View>
+                  <Text style={{ color: fx.ink, fontSize: 18, fontWeight: "900" }}>{connector.id} - {connector.type}</Text>
+                  <Text style={{ color: fx.muted, fontWeight: "800" }}>{connector.power}</Text>
+                </View>
+                <Text style={{ color: station.pricePerKwh ? fx.red : fx.muted, fontWeight: "900" }}>Rs {station.pricePerKwh ?? 18}/kWh</Text>
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <Ionicons name="radio-button-on" size={18} color={unavailable ? fx.red : fx.teal} />
+                <Text style={{ color: unavailable ? fx.red : fx.teal, fontWeight: "900" }}>{connector.status}</Text>
+                <Pill label={connector.power.replace(" ", "")} />
+              </View>
+            </Pressable>
+          );
+        })}
+      </FxCard>
+      <Cta label={selectedConnector ? `Select ${selectedConnector}` : "Select a connector"} icon="flash-outline" onPress={() => router.push("/confirm-pay")} />
+    </>
+  );
+}
+
+function ReviewsTab({ station }: { station: Station }) {
+  const reviews = station.reviews?.length ? station.reviews : [
+    { name: "Nikhil D.", rating: 5, time: "3 days ago", vehicle: "Tata Nexon EV", comment: "Charged via app. Connector and navigation were clear." },
+    { name: "Vikas Bhola", rating: 4, time: "4 days ago", vehicle: "Mahindra XEV 9e", comment: "Good charger access and smooth wallet settlement." }
+  ];
+  return (
+    <>
+      <FxCard>
+        <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Rating and reviews</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 18 }}>
+          <View style={{ alignItems: "center", width: 90 }}>
+            <Text style={{ color: fx.ink, fontSize: 36, fontWeight: "900" }}>{station.rating?.toFixed(1) ?? "4.6"}</Text>
+            <Ionicons name="star" size={20} color={fx.amber} />
+            <Text style={{ color: fx.muted, fontWeight: "800", marginTop: 8 }}>{station.reviewCount ?? reviews.length} Reviews</Text>
+          </View>
+          <View style={{ flex: 1, gap: 8 }}>
+            {[5, 4, 3, 2, 1].map((rating, index) => <RatingBar key={rating} rating={rating} fill={[0.88, 0.42, 0.18, 0.06, 0.03][index]} />)}
+          </View>
+        </View>
+      </FxCard>
+      <FxCard>
+        <Text style={{ color: fx.ink, fontSize: 22, fontWeight: "900" }}>Customer reviews</Text>
+        {reviews.map((review) => (
+          <View key={`${review.name}-${review.time}`} style={{ borderBottomWidth: 1, borderBottomColor: fx.line, paddingVertical: 12, gap: 6 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
+              <View>
+                <Text style={{ color: fx.ink, fontWeight: "900" }}>{review.name}</Text>
+                <Text style={{ color: fx.muted, fontSize: 12 }}>{review.time || "Recently"}</Text>
+              </View>
+              <Text style={{ color: fx.red, fontWeight: "900" }}>{review.vehicle || "Charged via app"}</Text>
+            </View>
+            <View style={{ flexDirection: "row", gap: 3 }}>{Array.from({ length: 5 }).map((_, index) => <Ionicons key={index} name="star" size={14} color={index < review.rating ? fx.amber : fx.line} />)}</View>
+            <Text style={{ color: fx.muted, lineHeight: 20 }}>{review.comment}</Text>
+          </View>
+        ))}
+      </FxCard>
+    </>
+  );
+}
+
+function RatingBar({ rating, fill }: { rating: number; fill: number }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <Text style={{ width: 14, color: fx.ink, fontWeight: "900" }}>{rating}</Text>
+      <View style={{ flex: 1, height: 10, borderRadius: 8, backgroundColor: "#e5e7eb", overflow: "hidden" }}>
+        <View style={{ width: `${fill * 100}%`, height: "100%", backgroundColor: fx.red, borderRadius: 8 }} />
+      </View>
+      <Text style={{ width: 36, color: fx.muted, textAlign: "right", fontWeight: "800" }}>{Math.round(fill * 100)}%</Text>
+    </View>
   );
 }
 
@@ -125,3 +223,4 @@ function PriceRow({ label, value }: { label: string; value: string }) {
     </View>
   );
 }
+

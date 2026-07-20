@@ -10,12 +10,25 @@ class NominatimProvider:
     def __init__(self) -> None:
         self.cache: dict[str, tuple[float, Any]] = {}
         self.user_agent = "ShubhPowerDemo/0.1 contact:info@shubhpower.com"
+        self.last_upstream_request_at = 0.0
+
+    async def _wait_for_rate_limit(self) -> None:
+        elapsed = time.monotonic() - self.last_upstream_request_at
+        if elapsed < 1:
+            import asyncio
+
+            await asyncio.sleep(1 - elapsed)
+        self.last_upstream_request_at = time.monotonic()
 
     async def search(self, query: str, limit: int = 5) -> list[dict]:
-        key = f"search:{query}:{limit}"
+        query = query.strip()
+        if len(query) < 3:
+            return []
+        key = f"search:{query.lower()}:{limit}"
         cached = self.cache.get(key)
         if cached and time.time() - cached[0] < 3600:
             return cached[1]
+        await self._wait_for_rate_limit()
         async with httpx.AsyncClient(timeout=8) as client:
             response = await client.get(
                 "https://nominatim.openstreetmap.org/search",
@@ -36,6 +49,7 @@ class NominatimProvider:
         cached = self.cache.get(key)
         if cached and time.time() - cached[0] < 3600:
             return cached[1]
+        await self._wait_for_rate_limit()
         async with httpx.AsyncClient(timeout=8) as client:
             response = await client.get(
                 "https://nominatim.openstreetmap.org/reverse",
