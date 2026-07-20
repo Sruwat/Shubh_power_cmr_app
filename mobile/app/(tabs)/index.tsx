@@ -33,7 +33,7 @@ export default function Home() {
             <CircleButton icon="notifications-outline" label="Notifications" onPress={() => router.push("/notifications")} />
           </View>
 
-          <SearchBar onPress={() => router.push("/search")} placeholder="Search station or area..." />
+          <SearchBar onPress={() => router.push("/search")} rightOnPress={() => router.push("/filters")} placeholder="Search station or area..." />
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 9 }}>
             <ModePill label="All EV" icon="layers-outline" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
@@ -43,17 +43,6 @@ export default function Home() {
             <Pill label={filters.connectorType} selected={filters.compatibleOnly} onPress={filters.toggleCompatibleOnly} />
             <Pill label="Filters" icon="options-outline" onPress={() => router.push("/filters")} />
           </ScrollView>
-
-          <Pressable accessibilityRole="button" onPress={() => router.push("/charging/SP-DEMO-LIVE")} style={{ backgroundColor: fx.navy, borderRadius: 14, padding: 12, flexDirection: "row", alignItems: "center", gap: 10, shadowColor: fx.navy, shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: 5 }, elevation: 4 }}>
-            <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.16)", alignItems: "center", justifyContent: "center" }}>
-              <Ionicons name="flash" size={15} color={fx.teal} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: "#fff", fontWeight: "900", fontSize: 13 }}>Charging - Live Session</Text>
-              <Text style={{ color: "#dce6ff", fontSize: 11 }}>Shubh Power Hub - CP01 - 14.2 kWh - Rs 291</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#fff" />
-          </Pressable>
         </View>
 
         <View style={{ position: "absolute", right: 16, bottom: 252, gap: 10 }}>

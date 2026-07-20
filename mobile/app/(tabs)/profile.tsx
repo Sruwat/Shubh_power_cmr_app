@@ -1,33 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { api } from "@/api/client";
 import { Cta, EnergyCard, fx, FxCard, FxHeader, FxScreen, ListRow, StatTile } from "@/components/Futuristic";
 import { useAuthStore } from "@/store/auth";
 
 export default function Profile() {
-  const queryClient = useQueryClient();
   const logout = useAuthStore((state) => state.logout);
   const localName = useAuthStore((state) => state.profileName);
   const localEmail = useAuthStore((state) => state.profileEmail);
   const localPhone = useAuthStore((state) => state.profilePhone);
   const me = useQuery({ queryKey: ["me"], queryFn: async () => (await api.get("/api/v1/users/me")).data, retry: false });
+  const vehicles = useQuery({
+    queryKey: ["vehicles"],
+    queryFn: async () => (await api.get("/api/v1/vehicles")).data as Array<Record<string, string | number | boolean | string[]>>,
+    retry: false
+  });
   const displayName = me.data?.name ?? localName ?? "Shubh Power user";
   const displayEmail = me.data?.email ?? localEmail ?? "Add email in Edit Profile";
   const phone = me.data?.phone ?? localPhone ?? "9876543210";
   const initials = displayName.split(" ").map((part: string) => part[0]).join("").slice(0, 2).toUpperCase() || "SP";
-  const addVehicle = useMutation({
-    mutationFn: async () => (await api.post("/api/v1/vehicles", { name: "Tata Nexon EV", connector_types: ["CCS2"] })).data,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["vehicles"] });
-      router.push("/vehicles");
-    },
-    onError: () => {
-      Alert.alert("Demo vehicle", "Opening your local vehicle garage.");
-      router.push("/vehicles");
-    }
-  });
+  const savedVehicles = vehicles.data ?? [];
+  const primaryVehicle = savedVehicles.find((vehicle) => vehicle.is_default) ?? savedVehicles[0];
+  const vehicleConnector = Array.isArray(primaryVehicle?.connector_types) ? primaryVehicle.connector_types[0] : undefined;
 
   return (
     <FxScreen>
@@ -55,11 +51,20 @@ export default function Profile() {
 
       <FxCard>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <Text style={{ color: fx.ink, fontSize: 17, fontWeight: "900" }}>My Vehicles (1)</Text>
+          <Text style={{ color: fx.ink, fontSize: 17, fontWeight: "900" }}>My Vehicles ({savedVehicles.length})</Text>
           <Text onPress={() => router.push("/vehicles")} style={{ color: fx.blue, fontWeight: "900" }}>Manage</Text>
         </View>
-        <ListRow icon="car-sport-outline" title="Tata Nexon EV" subtitle="DL01AB1234 - CCS2" right={<Text style={{ color: fx.blue, fontSize: 12, fontWeight: "900" }}>Primary</Text>} />
-        <Cta label="Add vehicle" icon="car-outline" onPress={() => addVehicle.mutate()} />
+        {primaryVehicle ? (
+          <ListRow
+            icon="car-sport-outline"
+            title={String(primaryVehicle.name ?? "My EV")}
+            subtitle={`${String(primaryVehicle.registration_number ?? "Registration pending")} - ${vehicleConnector ?? "Connector pending"}`}
+            right={<Text style={{ color: fx.blue, fontSize: 12, fontWeight: "900" }}>Primary</Text>}
+          />
+        ) : (
+          <Text style={{ color: fx.muted, lineHeight: 20 }}>No vehicle added yet. Add your EV manually or with a photo so charger matching becomes personal.</Text>
+        )}
+        <Cta label="Add vehicle" icon="car-outline" onPress={() => router.push({ pathname: "/vehicles", params: { add: "1" } })} />
       </FxCard>
 
       <FxCard>

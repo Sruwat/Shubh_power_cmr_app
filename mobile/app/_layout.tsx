@@ -61,9 +61,6 @@ export default function RootLayout() {
           <Animated.View style={{ transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1.04] }) }] }}>
             <BrandLogo variant="mark" width={118} />
           </Animated.View>
-          <View style={{ marginTop: 10, alignItems: "center" }}>
-            <BrandLogo variant="wordmark" width={152} />
-          </View>
           <Animated.Text
             style={{
               marginTop: 22,

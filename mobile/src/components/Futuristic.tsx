@@ -57,56 +57,19 @@ export function FxHeader({ title, subtitle, right, menuPress }: { title: string;
 export function HeaderLogoBadge({ compact = false }: { compact?: boolean }) {
   return (
     <View style={[styles.headerLogoBadge, compact && styles.headerLogoBadgeCompact]}>
-      <BrandLogo variant="wordmark" width={compact ? 70 : 82} />
+      <BrandLogo variant="mark" width={compact ? 52 : 62} />
     </View>
   );
 }
 
 export function BrandLogo({ variant = "wordmark", width = 92 }: { variant?: "wordmark" | "mark"; width?: number }) {
-  const pulse = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    if (variant !== "mark") return;
-    const loop = Animated.loop(Animated.sequence([
-      Animated.timing(pulse, { toValue: 1, duration: 1350, useNativeDriver: true }),
-      Animated.timing(pulse, { toValue: 0, duration: 1350, useNativeDriver: true })
-    ]));
-    loop.start();
-    return () => loop.stop();
-  }, [pulse, variant]);
-
   if (variant === "mark") {
     return (
-      <View style={{ width, height: width, alignItems: "center", justifyContent: "center" }}>
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            width: width * 1.18,
-            height: width * 1.18,
-            borderRadius: width * 0.59,
-            backgroundColor: "rgba(255,153,0,0.18)",
-            opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.28, 0.58] }),
-            transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.82, 1.08] }) }]
-          }}
-        />
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            width: width,
-            height: width,
-            borderRadius: width * 0.5,
-            backgroundColor: "rgba(22,143,226,0.14)",
-            opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.42, 0.16] }),
-            transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1.04, 1.24] }) }]
-          }}
-        />
-        <Image
-          source={require("../../assets/shubh-power-mark.png")}
-          resizeMode="contain"
-          style={{ width, height: width }}
-        />
-      </View>
+      <Image
+        source={require("../../assets/shubh-power-mark.png")}
+        resizeMode="contain"
+        style={{ width, height: width }}
+      />
     );
   }
   return (
@@ -181,13 +144,17 @@ export function Pill({ label, icon, selected = false, tone = "blue", onPress }: 
   );
 }
 
-export function SearchBar({ placeholder = "Search station, address, area...", onPress, rightIcon = "options-outline" }: { placeholder?: string; onPress?: () => void; rightIcon?: keyof typeof Ionicons.glyphMap }) {
+export function SearchBar({ placeholder = "Search station, address, area...", onPress, rightIcon = "options-outline", rightOnPress }: { placeholder?: string; onPress?: () => void; rightIcon?: keyof typeof Ionicons.glyphMap; rightOnPress?: () => void }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.search}>
-      <Ionicons name="search-outline" size={20} color={fx.faint} />
-      <Text style={styles.searchText}>{placeholder}</Text>
-      <Ionicons name={rightIcon} size={22} color={fx.blue} />
-    </Pressable>
+    <View style={styles.search}>
+      <Pressable accessibilityRole="button" onPress={onPress} style={styles.searchMain}>
+        <Ionicons name="search-outline" size={20} color={fx.faint} />
+        <Text style={styles.searchText}>{placeholder}</Text>
+      </Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel="Open filters" onPress={rightOnPress ?? onPress} style={styles.searchIconButton}>
+        <Ionicons name={rightIcon} size={22} color={fx.blue} />
+      </Pressable>
+    </View>
   );
 }
 
@@ -255,8 +222,8 @@ export const styles = StyleSheet.create({
   subtitle: { color: fx.muted, fontSize: 14, lineHeight: 20, fontWeight: "700" },
   backHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14 },
   backTitle: { color: fx.ink, fontSize: 17, fontWeight: "900" },
-  headerLogoBadge: { minWidth: 92, height: 50, borderRadius: 15, backgroundColor: "rgba(255,255,255,0.96)", borderWidth: 1.5, borderColor: "rgba(89,210,254,0.75)", alignItems: "center", justifyContent: "center", shadowColor: fx.blue, shadowOpacity: 0.16, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
-  headerLogoBadgeCompact: { minWidth: 78, height: 42, borderRadius: 13 },
+  headerLogoBadge: { minWidth: 64, height: 54, borderRadius: 16, backgroundColor: "transparent", alignItems: "center", justifyContent: "center" },
+  headerLogoBadgeCompact: { minWidth: 58, height: 48, borderRadius: 13 },
   circleButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: fx.card, borderWidth: 1, borderColor: fx.line, alignItems: "center", justifyContent: "center" },
   circleButtonDark: { backgroundColor: "rgba(255,255,255,0.16)", borderColor: "rgba(255,255,255,0.18)" },
   card: { backgroundColor: fx.card, borderRadius: 16, borderWidth: 1, borderColor: fx.line, padding: 18, gap: 12, shadowColor: "#0b1b33", shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
@@ -264,7 +231,9 @@ export const styles = StyleSheet.create({
   energyGlow: { position: "absolute", width: 150, height: 150, borderRadius: 75, right: -36, top: -45, backgroundColor: fx.teal },
   pill: { minHeight: 36, borderRadius: 18, borderWidth: 1, borderColor: fx.line, backgroundColor: fx.card, paddingHorizontal: 14, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
   pillText: { color: fx.muted, fontSize: 13, fontWeight: "900" },
-  search: { minHeight: 56, borderRadius: 16, backgroundColor: fx.card, borderWidth: 1, borderColor: fx.line, paddingHorizontal: 14, flexDirection: "row", alignItems: "center", gap: 10, shadowColor: "#0b1b33", shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
+  search: { minHeight: 56, borderRadius: 16, backgroundColor: fx.card, borderWidth: 1, borderColor: fx.line, paddingHorizontal: 8, flexDirection: "row", alignItems: "center", gap: 4, shadowColor: "#0b1b33", shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
+  searchMain: { flex: 1, minHeight: 54, flexDirection: "row", alignItems: "center", gap: 10, paddingLeft: 6 },
+  searchIconButton: { width: 46, height: 46, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   searchText: { flex: 1, color: fx.muted, fontSize: 16, fontWeight: "800" },
   input: { minHeight: 52, borderRadius: 14, borderWidth: 1, borderColor: fx.line, backgroundColor: fx.card, paddingHorizontal: 16, color: fx.ink, fontSize: 16, fontWeight: "700" },
   cta: { minHeight: 52, borderRadius: 15, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 9, paddingHorizontal: 18 },

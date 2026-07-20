@@ -27,7 +27,7 @@ export default function MapScreen() {
         <View style={{ alignItems: "flex-end" }}>
           <HeaderLogoBadge compact />
         </View>
-        <SearchBar placeholder="Search this area" onPress={() => router.push("/search")} />
+        <SearchBar placeholder="Search this area" onPress={() => router.push("/search")} rightOnPress={() => router.push("/filters")} />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 9 }}>
           <Pill label="Map" icon="map-outline" selected={!showList} onPress={() => setShowList(false)} />
           <Pill label="List" icon="list-outline" selected={showList} onPress={() => setShowList(true)} />
@@ -38,16 +38,6 @@ export default function MapScreen() {
           <Pill label={filters.connectorType} selected={filters.compatibleOnly} onPress={filters.toggleCompatibleOnly} />
           <Pill label="Filters" icon="options-outline" onPress={() => router.push("/filters")} />
         </ScrollView>
-        <Pressable accessibilityRole="button" onPress={() => router.push("/charging/SP-DEMO-LIVE")} style={{ backgroundColor: fx.navy, borderRadius: 14, padding: 12, flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.16)", alignItems: "center", justifyContent: "center" }}>
-            <Ionicons name="warning" size={13} color="#c7d2fe" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: "#fff", fontWeight: "900", fontSize: 13 }}>Charging - Live Session</Text>
-            <Text style={{ color: "#dce6ff", fontSize: 11 }}>Shubh Power Hub - CP01 - 14.2 kWh - Rs 291</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color="#fff" />
-        </Pressable>
       </View>
 
       <View style={{ position: "absolute", right: 16, bottom: selected ? 255 : 112, gap: 10 }}>

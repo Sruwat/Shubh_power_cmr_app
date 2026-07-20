@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ComponentProps } from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { api } from "@/api/client";
 import { BackHeader, Cta, fx, FxCard, FxInput, FxScreen, Pill, SectionLabel } from "@/components/Futuristic";
@@ -19,17 +19,22 @@ const vehicleKinds: Array<{ label: VehicleKind; icon: keyof typeof Ionicons.glyp
 
 export default function Vehicles() {
   const queryClient = useQueryClient();
+  const params = useLocalSearchParams<{ add?: string }>();
   const cameraRef = useRef<CameraView>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const [adding, setAdding] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [vehicleKind, setVehicleKind] = useState<VehicleKind>("Car");
-  const [brand, setBrand] = useState("Tata");
-  const [model, setModel] = useState("Nexon EV");
-  const [registrationNumber, setRegistrationNumber] = useState("DL01AB1234");
-  const [batteryKwh, setBatteryKwh] = useState("40");
+  const [brand, setBrand] = useState("");
+  const [model, setModel] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [batteryKwh, setBatteryKwh] = useState("");
   const [connector, setConnector] = useState("CCS2");
+
+  useEffect(() => {
+    if (params.add === "1") setAdding(true);
+  }, [params.add]);
 
   const vehicles = useQuery({
     queryKey: ["vehicles"],
@@ -43,7 +48,7 @@ export default function Vehicles() {
       brand,
       model,
       registration_number: registrationNumber,
-      battery_kwh: Number(batteryKwh) || 40,
+      battery_kwh: Number(batteryKwh) || null,
       connector_types: [connector],
       photo_url: photoUri,
       detection_status: photoUri ? "photo_captured_manual_confirmed" : "manual_confirmed",
@@ -74,8 +79,6 @@ export default function Vehicles() {
       const picture = await cameraRef.current?.takePictureAsync({ quality: 0.62, skipProcessing: true });
       setPhotoUri(picture?.uri ?? null);
       setCameraOpen(false);
-      setBrand((value) => value || "Tata");
-      setModel((value) => value || "Nexon EV");
     } catch {
       Alert.alert("Camera", "Photo capture is not available in this preview. You can still confirm details manually.");
       setCameraOpen(false);
@@ -97,10 +100,10 @@ export default function Vehicles() {
 
   return (
     <FxScreen>
-      <BackHeader title={adding ? "Add Your Vehicle" : `My Vehicles (${vehicles.data?.length || 1})`} onBack={() => adding ? setAdding(false) : router.back()} />
+      <BackHeader title={adding ? "Add Your Vehicle" : `My Vehicles (${vehicles.data?.length ?? 0})`} onBack={() => adding ? setAdding(false) : router.back()} />
       {!adding ? (
         <>
-          {(vehicles.data?.length ? vehicles.data : [{ vehicle_id: "demo", name: "Tata Nexon EV", registration_number: "DL01AB1234", battery_kwh: 40, connector_types: ["CCS2"], is_default: true }]).map((vehicle) => (
+          {vehicles.data?.length ? vehicles.data.map((vehicle) => (
             <FxCard key={String(vehicle.vehicle_id ?? vehicle.id ?? vehicle.name)}>
               <View style={{ flexDirection: "row", gap: 13, alignItems: "center" }}>
                 <View style={{ width: 54, height: 54, borderRadius: 18, backgroundColor: fx.cyan, alignItems: "center", justifyContent: "center" }}>
@@ -108,7 +111,7 @@ export default function Vehicles() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: fx.ink, fontWeight: "900", fontSize: 16 }}>{String(vehicle.name)}</Text>
-                  <Text style={{ color: fx.muted, fontSize: 12 }}>{String(vehicle.registration_number ?? "DL01AB1234")} - {String(vehicle.battery_kwh ?? 40)} kWh</Text>
+                  <Text style={{ color: fx.muted, fontSize: 12 }}>{String(vehicle.registration_number ?? "Registration pending")} - {String(vehicle.battery_kwh ?? "Battery pending")} kWh</Text>
                 </View>
                 <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#ffe9e6", alignItems: "center", justifyContent: "center" }}>
                   <Ionicons name="trash-outline" size={17} color={fx.red} />
@@ -119,7 +122,12 @@ export default function Vehicles() {
                 {vehicle.is_default ? <Pill label="Primary" tone="teal" selected /> : null}
               </View>
             </FxCard>
-          ))}
+          )) : (
+            <FxCard>
+              <Text style={{ color: fx.ink, fontWeight: "900", fontSize: 18 }}>No vehicle saved yet</Text>
+              <Text style={{ color: fx.muted, lineHeight: 20 }}>Add your own EV details. Nothing dummy will be shown in your investor APK.</Text>
+            </FxCard>
+          )}
           <Pressable accessibilityRole="button" onPress={() => setAdding(true)}>
             <FxCard style={{ borderStyle: "dashed", alignItems: "center" }}>
               <Text style={{ color: fx.blue, fontWeight: "900" }}>+ Add New Vehicle</Text>
@@ -169,7 +177,13 @@ export default function Vehicles() {
               {["CCS2", "Type 2", "CHAdeMO"].map((item) => <Pill key={item} label={item} selected={connector === item} onPress={() => setConnector(item)} />)}
             </View>
           </FxCard>
-          <Cta label="Save & Continue" icon="checkmark" onPress={() => saveVehicle.mutate()} disabled={saveVehicle.isPending} />
+          <Cta label="Save & Continue" icon="checkmark" onPress={() => {
+            if (!brand.trim() || !model.trim()) {
+              Alert.alert("Vehicle details required", "Please enter at least brand and model before saving.");
+              return;
+            }
+            saveVehicle.mutate();
+          }} disabled={saveVehicle.isPending} />
         </>
       )}
     </FxScreen>

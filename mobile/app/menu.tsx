@@ -11,7 +11,7 @@ export default function Menu() {
         <ListRow icon="map-outline" title="Find chargers" onPress={() => router.push("/(tabs)")} />
         <ListRow icon="calendar-outline" title="Bookings" onPress={() => router.push("/history")} />
         <ListRow icon="qr-code-outline" title="Scan charger" onPress={() => router.push("/(tabs)/scan")} />
-        <ListRow icon="flash-outline" title="Live session" onPress={() => router.push("/charging/SP-DEMO-LIVE")} />
+        <ListRow icon="time-outline" title="Charging history" onPress={() => router.push("/history")} />
       </FxCard>
       <FxCard>
         <Text style={{ color: fx.faint, fontSize: 12, fontWeight: "900" }}>ACCOUNT</Text>
