@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { Alert, Pressable, Text, View } from "react-native";
+import { useState } from "react";
+import { Alert, Image, Pressable, Text, View } from "react-native";
 import { api, distanceLabel, Station } from "@/api/client";
 import { BackHeader, Cta, EnergyCard, fx, FxCard, FxScreen, Pill, SectionLabel, StatTile } from "@/components/Futuristic";
 import { selectedStation, stations } from "@/data/experience";
@@ -10,6 +11,7 @@ import { openGoogleMapsDirections } from "@/utils/maps";
 
 export default function StationDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const [preference, setPreference] = useState<"time" | "amount" | "units">("time");
   const fallback = stations.find((station) => station.id === id) ?? selectedStation;
   const station = useQuery({
     queryKey: ["station", id],
@@ -17,6 +19,7 @@ export default function StationDetail() {
     retry: false
   });
   const item = station.data ?? fallback;
+  const isShubh = item.isShubhHub || /shu?bh/i.test(`${item.brand} ${item.name}`);
   const saveStation = useMutation({
     mutationFn: async () => (await api.post(`/api/v1/stations/${id}/save`)).data,
     onSuccess: () => Alert.alert("Station saved", "This charger has been added to your saved stations."),
@@ -35,8 +38,12 @@ export default function StationDetail() {
         <View style={{ alignSelf: "flex-start", borderRadius: 999, backgroundColor: fx.cyan, paddingHorizontal: 12, paddingVertical: 8 }}>
           <Text style={{ color: fx.teal, fontWeight: "900" }}>Charging available</Text>
         </View>
-        <Text style={{ color: "#fff", fontSize: 30, lineHeight: 36, fontWeight: "900" }}>{item.name}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          {isShubh ? <Image source={require("../../assets/shubh-power-mark.png")} resizeMode="contain" style={{ width: 38, height: 38 }} /> : null}
+          <Text style={{ color: "#fff", fontSize: 30, lineHeight: 36, fontWeight: "900", flex: 1 }}>{item.name}</Text>
+        </View>
         <Text style={{ color: "#dbe7ff", fontSize: 16, fontWeight: "700" }}>{item.brand} - {distanceLabel(item)}</Text>
+        {item.societyName ? <Text style={{ color: fx.sky, fontSize: 13, fontWeight: "900" }}>Private hub: {item.societyName}</Text> : null}
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
           <Pill label="Connector details updating" selected />
           <Pill label="Tariff updates at station" />
@@ -60,6 +67,12 @@ export default function StationDetail() {
           <StatTile label="Tariff" value={`Rs ${item.pricePerKwh ?? 18}`} tone="teal" />
         </View>
         <Text style={{ color: fx.muted, lineHeight: 22 }}>Charging available. Connector and price details may be updated by the station before charging starts.</Text>
+        <Text style={{ color: fx.ink, fontSize: 16, fontWeight: "900" }}>Charging preference</Text>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <PreferenceButton label="By time" value="30 min" selected={preference === "time"} onPress={() => setPreference("time")} />
+          <PreferenceButton label="By amount" value="Rs 500" selected={preference === "amount"} onPress={() => setPreference("amount")} />
+          <PreferenceButton label="By units" value="20 kWh" selected={preference === "units"} onPress={() => setPreference("units")} />
+        </View>
         <Cta label="Select Connector" icon="flash-outline" onPress={() => router.push("/select-connector")} />
       </FxCard>
 
@@ -92,6 +105,15 @@ export default function StationDetail() {
 
       <SectionLabel>Compatible with Tata Nexon EV, MG ZS EV, BYD Atto 3, fleet vehicles</SectionLabel>
     </FxScreen>
+  );
+}
+
+function PreferenceButton({ label, value, selected, onPress }: { label: string; value: string; selected: boolean; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={{ flex: 1, minHeight: 78, borderRadius: 15, borderWidth: 1.5, borderColor: selected ? fx.blue : fx.line, backgroundColor: selected ? "#e7f7ff" : "#fff", padding: 10, justifyContent: "center", gap: 4 }}>
+      <Text style={{ color: selected ? fx.blue : fx.muted, fontSize: 11, fontWeight: "900" }}>{label}</Text>
+      <Text style={{ color: fx.ink, fontSize: 14, fontWeight: "900" }}>{value}</Text>
+    </Pressable>
   );
 }
 

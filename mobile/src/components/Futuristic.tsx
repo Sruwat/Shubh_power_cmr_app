@@ -12,6 +12,7 @@ export const fx = {
   line: "#dfe7ef",
   blue: "#168fe2",
   blue2: "#2360a3",
+  sky: "#59d2fe",
   teal: "#23c4b5",
   cyan: "#dff4ff",
   navy: "#151343",
@@ -46,6 +47,7 @@ export function FxHeader({ title, subtitle, right, menuPress }: { title: string;
         <Text style={styles.title}>{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
+      <BrandLogo variant="mark" width={34} />
       {right}
       {menuPress ? <CircleButton icon="menu-outline" onPress={menuPress} label="Open menu" /> : null}
     </View>
@@ -113,7 +115,10 @@ export function BackHeader({ title, onBack, right }: { title: string; onBack: ()
     <View style={styles.backHeader}>
       <CircleButton icon="chevron-back" onPress={onBack} label="Back" />
       <Text style={styles.backTitle}>{title}</Text>
-      <View style={{ marginLeft: "auto" }}>{right}</View>
+      <View style={{ marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <BrandLogo variant="mark" width={30} />
+        {right}
+      </View>
     </View>
   );
 }

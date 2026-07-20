@@ -13,10 +13,14 @@ export default function SearchScreen() {
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     return stations
-      .filter((station) => filters.mode === "all" || station.brand.toLowerCase().includes("subh") || station.name.toLowerCase().includes("subh"))
+      .filter((station) => {
+        if (filters.mode === "all") return true;
+        if (filters.mode === "private") return station.stationCategory === "private" || station.isPrivateHub || Boolean(station.societyName);
+        return station.stationCategory === "shubh" || station.isShubhHub || station.brand.toLowerCase().includes("shubh") || station.name.toLowerCase().includes("shubh");
+      })
       .filter((station) => !filters.compatibleOnly || station.connector_summary.join(" ").toLowerCase().includes(filters.connectorType.toLowerCase()))
       .filter((station) => !filters.availableOnly || !station.availabilityLabel.toLowerCase().includes("busy"))
-      .filter((station) => !q || `${station.name} ${station.area} ${station.brand}`.toLowerCase().includes(q));
+      .filter((station) => !q || `${station.name} ${station.area} ${station.brand} ${station.societyName ?? ""}`.toLowerCase().includes(q));
   }, [filters.availableOnly, filters.compatibleOnly, filters.connectorType, filters.mode, query]);
 
   return (
@@ -32,7 +36,9 @@ export default function SearchScreen() {
       </FxCard>
       <Text style={{ color: fx.faint, fontSize: 12, fontWeight: "900" }}>ALL NEARBY STATIONS</Text>
       <View style={{ flexDirection: "row", gap: 9, flexWrap: "wrap" }}>
-        <Pill label="Shubh only" selected={filters.mode === "shubh"} tone="teal" onPress={() => filters.setMode(filters.mode === "shubh" ? "all" : "shubh")} />
+        <Pill label="Shubh only" selected={filters.mode === "shubh"} tone="teal" onPress={() => filters.setMode("shubh")} />
+        <Pill label="All stations" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+        <Pill label="Private hubs" selected={filters.mode === "private"} tone="violet" onPress={() => filters.setMode("private")} />
         <Pill label={filters.connectorType} selected={filters.compatibleOnly} onPress={filters.toggleCompatibleOnly} />
         <Pill label="Available" selected={filters.availableOnly} onPress={filters.toggleAvailableOnly} />
       </View>

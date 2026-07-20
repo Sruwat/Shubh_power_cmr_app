@@ -20,6 +20,7 @@ export default function Filters() {
         <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
           <Pill label="Shubh EV Charging Points" selected={filters.mode === "shubh"} tone="teal" onPress={() => filters.setMode("shubh")} />
           <Pill label="All Integrated Stations" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+          <Pill label="Private Charging Hub" selected={filters.mode === "private"} tone="violet" onPress={() => filters.setMode("private")} />
         </View>
       </FxCard>
       <FxCard>

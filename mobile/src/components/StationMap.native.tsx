@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef } from "react";
-import { Animated, Pressable, Text, View, ViewStyle } from "react-native";
+import { Animated, Image, Pressable, Text, View, ViewStyle } from "react-native";
 import { Station, customerStationStatus } from "@/api/client";
 import { fx } from "@/components/Futuristic";
 
@@ -14,7 +14,8 @@ export function StationMap({ coords, stations, onSelect }: { coords: { latitude:
       </View>
       {safeStations.map((station, index) => {
         const position = stationPosition(station, coords, index);
-        const isShubh = /shu?bh/i.test(`${station.brand} ${station.name}`);
+        const isShubh = station.isShubhHub || /shu?bh/i.test(`${station.brand} ${station.name}`);
+        const isPrivate = station.stationCategory === "private" || station.isPrivateHub;
         return (
           <Pressable
             key={station.id}
@@ -23,10 +24,11 @@ export function StationMap({ coords, stations, onSelect }: { coords: { latitude:
             onPress={() => onSelect(station)}
             style={{ position: "absolute", left: `${position.left}%`, top: `${position.top}%`, alignItems: "center" }}
           >
-            <View style={{ minWidth: 82, paddingHorizontal: 8, height: 30, borderRadius: 15, backgroundColor: isShubh ? fx.teal : fx.blue, alignItems: "center", justifyContent: "center", shadowColor: fx.navy, shadowOpacity: 0.18, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 4 }}>
+            <View style={{ minWidth: 82, paddingHorizontal: 8, height: 30, borderRadius: 15, backgroundColor: isPrivate ? fx.navy : isShubh ? fx.teal : fx.blue, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: 4, shadowColor: fx.navy, shadowOpacity: 0.18, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 4 }}>
+              {isShubh ? <Image source={require("../../assets/shubh-power-mark.png")} resizeMode="contain" style={{ width: 16, height: 16 }} /> : null}
               <Text numberOfLines={1} style={{ color: "#fff", fontSize: 11, fontWeight: "900" }}>Rs {station.pricePerKwh ?? 18} - {station.availabilityLabel || "free"}</Text>
             </View>
-            <View style={{ marginTop: 3, width: 14, height: 14, borderRadius: 7, borderWidth: 3, borderColor: "#fff", backgroundColor: isShubh ? fx.teal : fx.blue }} />
+            <View style={{ marginTop: 3, width: 14, height: 14, borderRadius: 7, borderWidth: 3, borderColor: "#fff", backgroundColor: isPrivate ? fx.navy : isShubh ? fx.teal : fx.blue }} />
           </Pressable>
         );
       })}

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { Station, distanceLabel } from "@/api/client";
 import { StationMap } from "@/components/StationMap";
 import { CircleButton, Cta, fx, Pill, SearchBar } from "@/components/Futuristic";
@@ -11,7 +11,7 @@ import { openGoogleMapsDirections } from "@/utils/maps";
 
 export default function MapScreen() {
   const { data, coords, filters } = useNearbyStations();
-  const stations = useMemo(() => (data?.items?.length ? data.items : demoStations).slice(0, 40), [data?.items]);
+  const stations = useMemo(() => (data?.items?.length ? data.items : demoStations.filter((station) => stationMatchesMode(station, filters.mode))).slice(0, 40), [data?.items, filters.mode]);
   const [selected, setSelected] = useState<Station | null>(stations[0] ?? null);
   const [showList, setShowList] = useState(false);
 
@@ -28,7 +28,9 @@ export default function MapScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 9 }}>
           <Pill label="Map" icon="map-outline" selected={!showList} onPress={() => setShowList(false)} />
           <Pill label="List" icon="list-outline" selected={showList} onPress={() => setShowList(true)} />
-          <Pill label="Shubh only" icon="flash-outline" selected={filters.mode === "shubh"} tone="teal" onPress={() => filters.setMode(filters.mode === "shubh" ? "all" : "shubh")} />
+          <ModePill label="Shubh only" icon="flash-outline" selected={filters.mode === "shubh"} onPress={() => filters.setMode("shubh")} />
+          <ModePill label="All" icon="layers-outline" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
+          <ModePill label="Private Hub" icon="business-outline" selected={filters.mode === "private"} onPress={() => filters.setMode("private")} />
           <Pill label="Fast DC" icon="flash-outline" selected={filters.minPowerKw >= 25} />
           <Pill label={filters.connectorType} selected={filters.compatibleOnly} onPress={filters.toggleCompatibleOnly} />
           <Pill label="Filters" icon="options-outline" onPress={() => router.push("/filters")} />
@@ -51,17 +53,20 @@ export default function MapScreen() {
       </View>
 
       {showList ? (
-        <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, maxHeight: 360, backgroundColor: "#fff", borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 16, gap: 10, borderWidth: 1, borderColor: fx.line }}>
-          <View style={{ width: 42, height: 5, borderRadius: 3, backgroundColor: fx.line, alignSelf: "center" }} />
+        <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, maxHeight: 360, backgroundColor: "#08223f", borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 16, gap: 10, borderWidth: 1, borderColor: "rgba(89,210,254,0.35)" }}>
+          <View style={{ width: 42, height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.24)", alignSelf: "center" }} />
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Text style={{ color: fx.ink, fontWeight: "900" }}>{stations.length} stations nearby</Text>
+            <Text style={{ color: "#fff", fontWeight: "900" }}>{stations.length} stations nearby</Text>
             <Pressable onPress={() => setShowList(false)}><Text style={{ color: fx.blue, fontWeight: "900" }}>Map view</Text></Pressable>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
             {stations.slice(0, 5).map((station) => (
-              <Pressable key={station.id} onPress={() => { setSelected(station); setShowList(false); }} style={{ width: 230, borderRadius: 16, borderWidth: 1, borderColor: fx.line, padding: 14, gap: 8 }}>
+              <Pressable key={station.id} onPress={() => { setSelected(station); setShowList(false); }} style={{ width: 230, borderRadius: 16, borderWidth: 1, borderColor: "rgba(89,210,254,0.35)", backgroundColor: "#fff", padding: 14, gap: 8 }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 8 }}>
-                  <Text numberOfLines={2} style={{ color: fx.ink, fontWeight: "900", flex: 1 }}>{station.name}</Text>
+                  <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    {station.isShubhHub || /shu?bh/i.test(`${station.brand} ${station.name}`) ? <Image source={require("../../assets/shubh-power-mark.png")} resizeMode="contain" style={{ width: 20, height: 20 }} /> : null}
+                    <Text numberOfLines={2} style={{ color: fx.ink, fontWeight: "900", flex: 1 }}>{station.name}</Text>
+                  </View>
                   <Text style={{ color: fx.blue, fontWeight: "900" }}>Rs {station.pricePerKwh ?? 18}</Text>
                 </View>
                 <Text style={{ color: fx.muted, fontSize: 12 }}>{station.area || station.brand}</Text>
@@ -74,7 +79,7 @@ export default function MapScreen() {
           </ScrollView>
         </View>
       ) : selected ? (
-        <View style={{ position: "absolute", left: 16, right: 16, bottom: 18, backgroundColor: "#fff", borderRadius: 20, padding: 16, gap: 12, borderWidth: 1, borderColor: fx.line }}>
+        <View style={{ position: "absolute", left: 16, right: 16, bottom: 18, backgroundColor: "#fff", borderRadius: 20, padding: 16, gap: 12, borderWidth: 1, borderColor: fx.sky }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
             <View style={{ flex: 1 }}>
               <Text style={{ color: fx.ink, fontSize: 20, lineHeight: 24, fontWeight: "900" }} numberOfLines={2}>{selected.name}</Text>
@@ -96,5 +101,20 @@ export default function MapScreen() {
         </View>
       ) : null}
     </View>
+  );
+}
+
+function stationMatchesMode(station: { stationCategory?: string; isPrivateHub?: boolean; isShubhHub?: boolean; societyName?: string; brand?: string; name?: string }, mode: "shubh" | "all" | "private") {
+  if (mode === "all") return true;
+  if (mode === "private") return station.stationCategory === "private" || station.isPrivateHub || Boolean(station.societyName);
+  return station.stationCategory === "shubh" || station.isShubhHub || /shu?bh/i.test(`${station.brand} ${station.name}`);
+}
+
+function ModePill({ label, icon, selected, onPress }: { label: string; icon: keyof typeof Ionicons.glyphMap; selected: boolean; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={{ minHeight: 36, borderRadius: 18, borderWidth: 1, borderColor: selected ? fx.navy : "rgba(22,143,226,0.32)", backgroundColor: selected ? fx.navy : "rgba(255,255,255,0.92)", paddingHorizontal: 13, flexDirection: "row", alignItems: "center", gap: 6 }}>
+      <Ionicons name={icon} size={15} color={selected ? "#fff" : fx.teal} />
+      <Text style={{ color: selected ? "#fff" : fx.muted, fontSize: 13, fontWeight: "900" }}>{label}</Text>
+    </Pressable>
   );
 }

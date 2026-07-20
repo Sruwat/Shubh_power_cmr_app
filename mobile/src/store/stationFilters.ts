@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type StationMode = "shubh" | "all";
+export type StationMode = "shubh" | "all" | "private";
 export type SortMode = "distance" | "availability" | "price" | "rating" | "speed";
 
 type StationFilterState = {

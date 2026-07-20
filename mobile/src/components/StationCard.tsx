@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Image, Linking, Pressable, Text, View } from "react-native";
 import { customerStationStatus, distanceLabel, Station } from "@/api/client";
 import { fx } from "@/components/Futuristic";
 
@@ -8,12 +8,17 @@ export function StationCard({ station, compact = false }: { station: Station; co
   const connectors = [...new Set(station.connectorDetails?.map((item) => item.type) ?? ["CCS2"])].slice(0, 3);
   const isBusy = (station.availabilityLabel || "").toLowerCase().includes("busy") || (station.availabilityLabel || "").toLowerCase().includes("full");
   const status = customerStationStatus(station);
+  const isShubh = station.isShubhHub || /shu?bh/i.test(`${station.brand} ${station.name}`);
   return (
     <Pressable accessibilityRole="button" onPress={() => router.push(`/station/${station.id}`)} style={{ backgroundColor: fx.card, borderRadius: 16, borderWidth: 1, borderColor: fx.line, padding: 16, gap: 10, shadowColor: "#0b1b33", shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
         <View style={{ flex: 1, gap: 3 }}>
-          <Text style={{ color: fx.ink, fontSize: 17, lineHeight: 21, fontWeight: "900" }} numberOfLines={2}>{station.name}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+            {isShubh ? <Image source={require("../../assets/shubh-power-mark.png")} resizeMode="contain" style={{ width: 22, height: 22 }} /> : null}
+            <Text style={{ color: fx.ink, fontSize: 17, lineHeight: 21, fontWeight: "900", flex: 1 }} numberOfLines={2}>{station.name}</Text>
+          </View>
           <Text style={{ color: fx.muted, fontSize: 12, fontWeight: "700" }} numberOfLines={1}>{station.area || station.brand}</Text>
+          {station.societyName ? <Text style={{ color: fx.teal, fontSize: 11, fontWeight: "900" }} numberOfLines={1}>{station.societyName}</Text> : null}
         </View>
         <View style={{ alignItems: "flex-end", gap: 3 }}>
           <Text style={{ color: fx.ink, fontSize: 18, fontWeight: "900" }}>Rs {station.pricePerKwh ?? 18}<Text style={{ fontSize: 11, color: fx.muted }}>/kWh</Text></Text>

@@ -38,12 +38,12 @@ export default function RootLayout() {
             pointerEvents="none"
             style={{
               position: "absolute",
-              width: 320,
-              height: 320,
-              borderRadius: 160,
-              backgroundColor: "rgba(255,159,28,0.28)",
+              width: 360,
+              height: 360,
+              borderRadius: 180,
+              backgroundColor: "rgba(89,210,254,0.28)",
               transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.78, 1.1] }) }],
-              opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.34, 0.68] })
+              opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.25, 0.64] })
             }}
           />
           <Animated.View
@@ -53,13 +53,16 @@ export default function RootLayout() {
               width: 420,
               height: 420,
               borderRadius: 210,
-              backgroundColor: "rgba(22,143,226,0.22)",
+              backgroundColor: "rgba(35,196,181,0.18)",
               transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1.08, 0.9] }) }],
               opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.18, 0.46] })
             }}
           />
-          <View style={{ width: 178, height: 118, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.94)", alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOpacity: 0.26, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 8 }}>
-            <BrandLogo variant="wordmark" width={144} />
+          <Animated.View style={{ transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1.04] }) }] }}>
+            <BrandLogo variant="mark" width={118} />
+          </Animated.View>
+          <View style={{ marginTop: 10, alignItems: "center" }}>
+            <BrandLogo variant="wordmark" width={152} />
           </View>
           <Animated.Text
             style={{
@@ -71,10 +74,10 @@ export default function RootLayout() {
               transform: [{ translateY: pulse.interpolate({ inputRange: [0, 1], outputRange: [4, 0] }) }]
             }}
           >
-            Subh Power
+            Shubh Power
           </Animated.Text>
-          <Text style={{ marginTop: 6, color: "#9edbff", fontSize: 12, fontWeight: "900", letterSpacing: 1.6 }}>EV CHARGING</Text>
-          <Text style={{ position: "absolute", bottom: 64, color: "#8ed1ff", fontSize: 12, fontWeight: "900", letterSpacing: 1.8 }}>POWERING GREEN MOBILITY</Text>
+          <Text style={{ marginTop: 6, color: "#59d2fe", fontSize: 12, fontWeight: "900", letterSpacing: 1.6 }}>EV CHARGING</Text>
+          <Text style={{ position: "absolute", bottom: 64, color: "#59d2fe", fontSize: 12, fontWeight: "900", letterSpacing: 1.8 }}>POWERING GREEN MOBILITY</Text>
         </View>
       </GestureHandlerRootView>
     );

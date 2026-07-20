@@ -5,6 +5,12 @@ import { api, Station } from "@/api/client";
 import { withPresentation } from "@/data/presentation";
 import { useStationFilters } from "@/store/stationFilters";
 
+function stationMatchesMode(station: Station, mode: "shubh" | "all" | "private") {
+  if (mode === "all") return true;
+  if (mode === "private") return station.stationCategory === "private" || station.isPrivateHub === true || Boolean(station.societyName);
+  return station.stationCategory === "shubh" || station.isShubhHub === true || /shu?bh/i.test(`${station.brand} ${station.name}`);
+}
+
 export function useNearbyStations() {
   const [coords, setCoords] = useState({ latitude: 28.5355, longitude: 77.391 });
   const [locationLabel, setLocationLabel] = useState("Manual: Noida");
@@ -55,7 +61,7 @@ export function useNearbyStations() {
       });
       const items = response.data.items
         .map((station, index) => withPresentation(station, index))
-        .filter((station) => filters.mode === "all" || /shu?bh/i.test(`${station.brand} ${station.name}`))
+        .filter((station) => stationMatchesMode(station, filters.mode))
         .filter((station) => !filters.compatibleOnly || station.connector_summary.join(" ").toLowerCase().includes(filters.connectorType.toLowerCase()) || station.connectorDetails?.some((item) => item.type.toLowerCase() === filters.connectorType.toLowerCase()))
         .filter((station) => !filters.availableOnly || station.demo_charging_enabled || !(station.availabilityLabel || "").toLowerCase().includes("busy"))
         .sort((a, b) => {

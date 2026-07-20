@@ -45,6 +45,11 @@ export type Station = {
   id: string;
   name: string;
   brand: string;
+  stationCategory?: "shubh" | "integrated" | "private";
+  societyName?: string;
+  locality?: string;
+  isPrivateHub?: boolean;
+  isShubhHub?: boolean;
   distance_km?: number;
   operational_status: string;
   verification_status: string;
