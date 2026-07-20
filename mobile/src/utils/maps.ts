@@ -17,12 +17,24 @@ export function googleMapsDirectionsUrl(station: Station) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeStationQuery(station)}`;
 }
 
-export async function openGoogleMapsDirections(station: Station) {
-  const url = googleMapsDirectionsUrl(station);
-  const canOpen = await Linking.canOpenURL(url);
-  if (!canOpen) {
-    Alert.alert("Google Maps unavailable", "Please install or enable a maps app, then try navigation again.");
-    return;
+function geoDirectionsUrl(station: Station) {
+  const coordinates = station.coordinates;
+  const label = encodeStationQuery(station);
+  if (coordinates?.latitude && coordinates?.longitude) {
+    return `geo:${coordinates.latitude},${coordinates.longitude}?q=${coordinates.latitude},${coordinates.longitude}(${label})`;
   }
-  await Linking.openURL(url);
+  return `geo:0,0?q=${label}`;
+}
+
+export async function openGoogleMapsDirections(station: Station) {
+  const urls = [googleMapsDirectionsUrl(station), geoDirectionsUrl(station)];
+  for (const url of urls) {
+    try {
+      await Linking.openURL(url);
+      return;
+    } catch {
+      // Try the next navigation format before showing an error.
+    }
+  }
+  Alert.alert("Maps unavailable", "Please install or enable Google Maps or a browser, then try navigation again.");
 }
