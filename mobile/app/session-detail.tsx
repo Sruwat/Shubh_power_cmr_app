@@ -1,11 +1,12 @@
 import { router } from "expo-router";
 import { Text, View } from "react-native";
-import { BackHeader, Cta, EnergyCard, fx, FxCard, FxScreen, StatTile } from "@/components/Futuristic";
+import { Cta, EnergyCard, fx, FxCard, FxScreen, StatTile } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function SessionDetail() {
   return (
     <FxScreen>
-      <BackHeader title="Session Detail" onBack={() => router.back()} />
+      <TopChromeBar title="Session detail" subtitle="" />
       <EnergyCard style={{ backgroundColor: fx.teal }}>
         <Text style={{ color: "#dff", fontWeight: "800" }}>Session ID</Text>
         <Text style={{ color: "#fff", fontSize: 17, fontWeight: "900" }}>SP-S-20240718-01847</Text>

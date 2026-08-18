@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Text, View } from "react-native";
-import { BackHeader, Cta, fx, FxCard, FxScreen } from "@/components/Futuristic";
+import { Cta, fx, FxCard, FxScreen } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function PaymentFailed() {
   return (
     <FxScreen>
-      <BackHeader title="Payment Failed" onBack={() => router.back()} />
+      <TopChromeBar title="Payment failed" subtitle="" />
       <View style={{ alignItems: "center", gap: 14, marginTop: 60 }}>
         <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: "#ffe5e2", alignItems: "center", justifyContent: "center" }}><Ionicons name="card-outline" size={36} color={fx.red} /></View>
         <Text style={{ color: fx.ink, fontSize: 22, fontWeight: "900" }}>Payment Failed</Text>

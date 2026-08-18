@@ -1,14 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Text, View } from "react-native";
-import { BackHeader, BottomCta, fx, FxScreen } from "@/components/Futuristic";
+import { BottomCta, fx, FxScreen } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function NavigationRoute() {
   return (
     <FxScreen scroll={false}>
       <View style={{ flex: 1 }}>
         <View style={{ height: "62%", backgroundColor: "#dfeef9", padding: 18 }}>
-          <BackHeader title="" onBack={() => router.back()} />
+          <TopChromeBar title="Navigate to station" subtitle="" />
           <View style={{ flex: 1, justifyContent: "center" }}>
             <View style={{ height: 10, borderRadius: 8, backgroundColor: fx.blue, transform: [{ rotate: "-28deg" }], marginHorizontal: 75 }} />
             <View style={{ height: 10, borderRadius: 8, backgroundColor: fx.blue, transform: [{ rotate: "28deg" }], marginHorizontal: 120, marginTop: 55 }} />

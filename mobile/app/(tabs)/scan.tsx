@@ -1,61 +1,33 @@
 import { Ionicons } from "@expo/vector-icons";
-import { CameraView, useCameraPermissions } from "expo-camera";
 import { router } from "expo-router";
-import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { Cta, EnergyCard, fx, FxCard, FxInput, FxScreen, HeaderLogoBadge } from "@/components/Futuristic";
+import { fx, FxScreen } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function Scan() {
-  const [permission, requestPermission] = useCameraPermissions();
-  const [chargerId, setChargerId] = useState("");
-
   return (
-    <FxScreen>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: fx.ink, fontSize: 30, lineHeight: 36, fontWeight: "900" }}>Scan charger</Text>
-          <Text style={{ color: fx.muted, fontSize: 14, fontWeight: "700", marginTop: -2 }}>Point your camera at the QR code on the charger</Text>
+    <FxScreen scroll={false} style={{ backgroundColor: fx.navy }}>
+      <TopChromeBar subtitle="" />
+      <View style={{ flex: 1, backgroundColor: fx.navy, paddingHorizontal: 18, paddingTop: 28, alignItems: "center" }}>
+        <Text style={{ color: "#fff", fontSize: 24, fontWeight: "900", textAlign: "center" }}>Scan charger QR</Text>
+        <Text style={{ color: "#b9c9dc", fontSize: 11, lineHeight: 14, marginTop: 4, textAlign: "center" }}>Works across supported partner networks</Text>
+
+        <View style={{ marginTop: 64, width: 194, height: 194, borderRadius: 18, borderWidth: 3, borderColor: "#57f0b4", backgroundColor: "rgba(14,35,61,0.72)", alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: "80%", height: 2, backgroundColor: "#67f1ab", position: "absolute", top: "50%", marginTop: -1 }} />
+          <Ionicons name="qr-code-outline" size={58} color="rgba(255,255,255,0.38)" />
         </View>
-        <HeaderLogoBadge compact />
+
+        <View style={{ marginTop: 28, width: 40, height: 40, borderRadius: 20, backgroundColor: "#233f62", alignItems: "center", justifyContent: "center" }}>
+          <Ionicons name="flash-outline" size={18} color="#fff" />
+        </View>
+        <Pressable accessibilityRole="button" onPress={() => router.push("/enter-charger")} style={{ marginTop: 24, paddingVertical: 10, paddingHorizontal: 10 }}>
+          <Text style={{ color: "#73c6ff", fontSize: 12, fontWeight: "800", textDecorationLine: "underline" }}>QR damaged? Enter charger ID</Text>
+        </Pressable>
+        <View style={{ marginTop: 18, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.08)", flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Ionicons name="shield-checkmark-outline" size={12} color="#8af0be" />
+          <Text style={{ color: "#9fd7c7", fontSize: 10, fontWeight: "800" }}>Shubh chargers also support offline access</Text>
+        </View>
       </View>
-
-      {permission?.granted ? (
-        <View style={{ height: 330, overflow: "hidden", borderRadius: 20, backgroundColor: fx.navy }}>
-          <CameraView style={{ flex: 1 }} barcodeScannerSettings={{ barcodeTypes: ["qr"] }} onBarcodeScanned={() => router.push("/select-connector")} />
-          <View pointerEvents="none" style={{ position: "absolute", left: 70, right: 70, top: 78, bottom: 78, borderWidth: 3, borderColor: fx.teal, borderRadius: 22 }} />
-          <Text style={{ position: "absolute", left: 20, right: 20, bottom: 18, color: "#fff", textAlign: "center", fontWeight: "800" }}>QR codes are on the charger unit or printed nearby</Text>
-        </View>
-      ) : (
-        <EnergyCard>
-          <Ionicons name="qr-code-outline" size={50} color={fx.teal} />
-          <Text style={{ color: "#fff", fontSize: 25, lineHeight: 30, fontWeight: "900" }}>Enable camera scanning</Text>
-          <Text style={{ color: "#8b91ae", fontSize: 16, lineHeight: 23, fontWeight: "700" }}>Camera access is used only to scan charger QR codes.</Text>
-          <Cta label="Allow camera" icon="camera-outline" kind="secondary" onPress={() => void requestPermission()} />
-        </EnergyCard>
-      )}
-
-      <FxCard>
-        <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Enter charger code</Text>
-        <Text style={{ color: fx.muted, lineHeight: 22 }}>If the QR code is damaged, enter the charger code printed near the connector.</Text>
-        <FxInput value={chargerId} onChangeText={setChargerId} placeholder="e.g. SP-N62-CP01" autoCapitalize="characters" />
-        <Cta label="Continue" icon="arrow-forward" disabled={!chargerId.trim()} onPress={() => router.push("/select-connector")} />
-      </FxCard>
-
-      <FxCard>
-        <Text style={{ color: fx.ink, fontSize: 23, fontWeight: "900" }}>Charging steps</Text>
-        {["Scan QR - Identify the charger securely.", "Confirm tariff - Review connector, price and payment method.", "Start charging - Track energy, time and cost live."].map((line, index) => (
-          <View key={line} style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
-            <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: fx.cyan, alignItems: "center", justifyContent: "center" }}>
-              <Text style={{ color: fx.blue, fontWeight: "900" }}>{index + 1}</Text>
-            </View>
-            <Text style={{ color: fx.ink, flex: 1, fontWeight: "800", lineHeight: 21 }}>{line}</Text>
-          </View>
-        ))}
-      </FxCard>
-
-      <Pressable accessibilityRole="button" onPress={() => router.push("/enter-charger")} style={{ alignItems: "center", padding: 8 }}>
-        <Text style={{ color: fx.blue, fontWeight: "900" }}>Enter Charger ID Manually</Text>
-      </Pressable>
     </FxScreen>
   );
 }

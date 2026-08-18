@@ -3,6 +3,8 @@ import { PropsWithChildren, ReactNode } from "react";
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, radius, spacing, type } from "./tokens";
+import shubhWordmark from "../../assets/shubh-power-wordmark.png";
+import { useDrawer } from "@/components/drawerContext";
 
 export function Screen({ children, scroll = false, padded = true }: PropsWithChildren<{ scroll?: boolean; padded?: boolean }>) {
   const insets = useSafeAreaInsets();
@@ -76,15 +78,29 @@ export function Field(props: TextInputProps) {
   return <TextInput placeholderTextColor="#8f8f8f" style={styles.field} {...props} />;
 }
 
-export function AppHeader({ title, subtitle, right }: { title: string; subtitle?: string; right?: ReactNode }) {
+export function AppHeader({ title, subtitle, right, backPress, notificationPress }: { title: string; subtitle?: string; right?: ReactNode; backPress?: () => void; notificationPress?: () => void }) {
+  const { openDrawer } = useDrawer();
   return (
     <View style={styles.header}>
-      <View style={{ flex: 1 }}>
-        <Image source={require("../../assets/shubh-power-wordmark.png")} resizeMode="contain" style={{ width: 92, height: 60 }} />
+      <View style={styles.headerLeft}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Open menu" onPress={openDrawer} style={styles.headerButton}>
+          <Ionicons name="menu-outline" size={22} color={colors.navy} />
+        </Pressable>
+        {backPress ? (
+          <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={backPress} style={styles.headerButton}>
+            <Ionicons name="chevron-back" size={22} color={colors.navy} />
+          </Pressable>
+        ) : null}
+      </View>
+      <View style={{ flex: 1, minHeight: 56 }}>
+        <Image source={shubhWordmark} resizeMode="contain" style={{ width: 102, height: 36 }} />
         <Title compact>{title}</Title>
         {subtitle ? <Caption>{subtitle}</Caption> : null}
       </View>
-      {right}
+      <View style={styles.headerRight}>
+        {notificationPress ? <Pressable accessibilityRole="button" accessibilityLabel="Notifications" onPress={notificationPress} style={styles.headerButton}><Ionicons name="notifications-outline" size={20} color={colors.navy} /></Pressable> : null}
+        {right}
+      </View>
     </View>
   );
 }
@@ -118,17 +134,20 @@ export function EmptyState({ title, body, icon = "information-circle-outline" }:
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: "#edf5fb" },
   padded: { paddingHorizontal: spacing.xl, paddingTop: spacing.md, gap: spacing.lg },
   scrollContent: { gap: spacing.lg },
-  card: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: 1, borderColor: colors.border, padding: spacing.lg, gap: spacing.md },
+  card: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: 1, borderColor: "#d8e4f0", padding: spacing.lg, gap: spacing.md, shadowColor: "#0b1b33", shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
   title: { color: colors.navy, fontSize: type.h1, lineHeight: 34, fontWeight: "800" },
   titleCompact: { fontSize: 26, lineHeight: 31 },
   sectionTitle: { color: colors.navy, fontSize: type.h2, lineHeight: 26, fontWeight: "800" },
   body: { color: colors.body, fontSize: type.small, lineHeight: 21 },
   caption: { color: colors.muted, fontSize: type.caption, lineHeight: 17, fontWeight: "600" },
   brand: { color: colors.primary, fontSize: type.caption, lineHeight: 16, fontWeight: "900", textTransform: "uppercase" },
-  header: { flexDirection: "row", alignItems: "center", gap: spacing.md },
+  header: { flexDirection: "row", alignItems: "center", gap: spacing.md, backgroundColor: "#fff", borderRadius: 24, borderWidth: 1, borderColor: "#dce8f5", padding: 14, shadowColor: "#0b1b33", shadowOpacity: 0.08, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
+  headerLeft: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  headerButton: { width: 42, height: 42, borderRadius: 15, backgroundColor: "#f4f8fb", borderWidth: 1, borderColor: "#e2ebf4", alignItems: "center", justifyContent: "center" },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   badge: { alignSelf: "flex-start", borderWidth: 1, borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.xs },
   badgeText: { fontSize: type.caption, fontWeight: "700" },
   primaryButton: { minHeight: 52, borderRadius: radius.button, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.lg },

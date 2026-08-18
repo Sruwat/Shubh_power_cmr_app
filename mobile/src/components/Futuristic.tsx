@@ -2,6 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { PropsWithChildren, ReactNode, useEffect, useRef } from "react";
 import { Animated, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import shubhMark from "../../assets/shubh-power-mark.png";
+import shubhWordmark from "../../assets/shubh-power-wordmark.png";
+import { useDrawer } from "@/components/drawerContext";
 
 export const fx = {
   bg: "#f2f7fc",
@@ -40,16 +43,23 @@ export function FxScreen({ children, scroll = true, style }: PropsWithChildren<{
   );
 }
 
-export function FxHeader({ title, subtitle, right, menuPress }: { title: string; subtitle?: string; right?: ReactNode; menuPress?: () => void }) {
+export function FxHeader({ title, subtitle, right, menuPress, notificationPress }: { title: string; subtitle?: string; right?: ReactNode; menuPress?: () => void; notificationPress?: () => void }) {
+  const { openDrawer } = useDrawer();
+  const handleMenuPress = menuPress ?? openDrawer;
   return (
     <View style={styles.header}>
+      <View style={styles.headerLeft}>
+        <CircleButton icon="menu-outline" onPress={handleMenuPress} label="Open menu" />
+        <HeaderLogoBadge compact />
+      </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.title}>{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
-      <HeaderLogoBadge />
-      {right}
-      {menuPress ? <CircleButton icon="menu-outline" onPress={menuPress} label="Open menu" /> : null}
+      <View style={styles.headerRight}>
+        {right}
+        {notificationPress ? <CircleButton icon="notifications-outline" onPress={notificationPress} label="Notifications" /> : null}
+      </View>
     </View>
   );
 }
@@ -57,7 +67,7 @@ export function FxHeader({ title, subtitle, right, menuPress }: { title: string;
 export function HeaderLogoBadge({ compact = false }: { compact?: boolean }) {
   return (
     <View style={[styles.headerLogoBadge, compact && styles.headerLogoBadgeCompact]}>
-      <BrandLogo variant="mark" width={compact ? 52 : 62} />
+      <BrandLogo variant="wordmark" width={compact ? 82 : 98} />
     </View>
   );
 }
@@ -66,7 +76,7 @@ export function BrandLogo({ variant = "wordmark", width = 92 }: { variant?: "wor
   if (variant === "mark") {
     return (
       <Image
-        source={require("../../assets/shubh-power-mark.png")}
+        source={shubhMark}
         resizeMode="contain"
         style={{ width, height: width }}
       />
@@ -74,20 +84,24 @@ export function BrandLogo({ variant = "wordmark", width = 92 }: { variant?: "wor
   }
   return (
     <Image
-      source={require("../../assets/shubh-power-wordmark.png")}
+      source={shubhWordmark}
       resizeMode="contain"
       style={{ width, height: width * 0.72 }}
     />
   );
 }
 
-export function BackHeader({ title, onBack, right }: { title: string; onBack: () => void; right?: ReactNode }) {
+export function BackHeader({ title, onBack, right, menuPress, notificationPress }: { title: string; onBack: () => void; right?: ReactNode; menuPress?: () => void; notificationPress?: () => void }) {
+  const { openDrawer } = useDrawer();
+  const handleMenuPress = menuPress ?? openDrawer;
   return (
     <View style={styles.backHeader}>
+      <CircleButton icon="menu-outline" onPress={handleMenuPress} label="Open menu" />
       <CircleButton icon="chevron-back" onPress={onBack} label="Back" />
+      <HeaderLogoBadge compact />
       <Text style={styles.backTitle}>{title}</Text>
       <View style={{ marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 8 }}>
-        <HeaderLogoBadge compact />
+        {notificationPress ? <Pressable accessibilityRole="button" accessibilityLabel="Notifications" onPress={notificationPress} style={styles.smallAction}><Ionicons name="notifications-outline" size={18} color={fx.ink} /></Pressable> : null}
         {right}
       </View>
     </View>
@@ -216,16 +230,19 @@ export function Divider() {
 export const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: fx.bg },
   scroll: { paddingHorizontal: 20, paddingTop: 18, gap: 14 },
-  header: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 8 },
+  header: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 8, minHeight: 56 },
+  headerLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: 8 },
   brand: { color: fx.blue, fontSize: 13, lineHeight: 16, fontWeight: "900" },
   title: { color: fx.ink, fontSize: 30, lineHeight: 35, fontWeight: "900" },
   subtitle: { color: fx.muted, fontSize: 14, lineHeight: 20, fontWeight: "700" },
-  backHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14 },
+  backHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14, minHeight: 54 },
   backTitle: { color: fx.ink, fontSize: 17, fontWeight: "900" },
-  headerLogoBadge: { minWidth: 64, height: 54, borderRadius: 16, backgroundColor: "transparent", alignItems: "center", justifyContent: "center" },
-  headerLogoBadgeCompact: { minWidth: 58, height: 48, borderRadius: 13 },
+  headerLogoBadge: { minWidth: 88, height: 54, borderRadius: 16, backgroundColor: "transparent", alignItems: "center", justifyContent: "center" },
+  headerLogoBadgeCompact: { minWidth: 82, height: 46, borderRadius: 13 },
   circleButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: fx.card, borderWidth: 1, borderColor: fx.line, alignItems: "center", justifyContent: "center" },
   circleButtonDark: { backgroundColor: "rgba(255,255,255,0.16)", borderColor: "rgba(255,255,255,0.18)" },
+  smallAction: { width: 36, height: 36, borderRadius: 18, backgroundColor: fx.card, borderWidth: 1, borderColor: fx.line, alignItems: "center", justifyContent: "center" },
   card: { backgroundColor: fx.card, borderRadius: 16, borderWidth: 1, borderColor: fx.line, padding: 18, gap: 12, shadowColor: "#0b1b33", shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
   energyCard: { backgroundColor: fx.navy, borderRadius: 20, padding: 20, gap: 12, overflow: "hidden", shadowColor: fx.navy, shadowOpacity: 0.22, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 4 },
   energyGlow: { position: "absolute", width: 150, height: 150, borderRadius: 75, right: -36, top: -45, backgroundColor: fx.teal },

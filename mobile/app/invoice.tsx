@@ -1,12 +1,12 @@
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Text, View } from "react-native";
-import { BackHeader, Cta, fx, FxCard, FxScreen } from "@/components/Futuristic";
+import { Cta, fx, FxCard, FxScreen } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function Invoice() {
   return (
     <FxScreen>
-      <BackHeader title="Invoice" onBack={() => router.back()} right={<Text style={{ color: fx.blue, fontWeight: "900" }}><Ionicons name="download-outline" /> Download</Text>} />
+      <TopChromeBar title="Invoice" subtitle="" />
       <FxCard style={{ padding: 0, overflow: "hidden" }}>
         <View style={{ backgroundColor: fx.blue2, padding: 18, flexDirection: "row", justifyContent: "space-between" }}>
           <View><Text style={{ color: "#fff", fontWeight: "900" }}>Shubh Power EV</Text><Text style={{ color: "#dbe7ff" }}>Tax Invoice</Text></View>

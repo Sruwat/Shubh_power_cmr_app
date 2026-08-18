@@ -1,12 +1,13 @@
 import { router } from "expo-router";
 import { Text, View } from "react-native";
-import { BackHeader, BottomCta, fx, FxCard, FxScreen } from "@/components/Futuristic";
+import { BottomCta, fx, FxCard, FxScreen } from "@/components/Futuristic";
 import { bookingDates, bookingTimes, selectedStation } from "@/data/experience";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function BookSlot() {
   return (
     <FxScreen>
-      <BackHeader title="Book Slot" onBack={() => router.back()} />
+      <TopChromeBar title="Book slot" subtitle="" />
       <FxCard>
         <Text style={{ color: fx.ink, fontWeight: "900" }}>{selectedStation.name}</Text>
         <Text style={{ color: fx.muted }}>{selectedStation.connectorDetails[0].type} - {selectedStation.powerLabel} - Rs {selectedStation.pricePerKwh}/kWh - {selectedStation.distance_km} km</Text>

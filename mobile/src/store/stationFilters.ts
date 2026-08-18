@@ -60,5 +60,5 @@ export const useStationFilters = create<StationFilterState>((set) => ({
   toggleAvailableOnly: () => set((state) => ({ availableOnly: !state.availableOnly })),
   toggleCompatibleOnly: () => set((state) => ({ compatibleOnly: !state.compatibleOnly })),
   toggleDemoOnly: () => set((state) => ({ demoOnly: !state.demoOnly })),
-  reset: () => set(defaults)
+  reset: () => set({ ...defaults })
 }));

@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Text } from "react-native";
-import { BackHeader, fx, FxCard, FxScreen, ListRow } from "@/components/Futuristic";
+import { fx, FxCard, FxScreen, ListRow } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function Payments() {
   return (
     <FxScreen>
-      <BackHeader title="Saved Payments" onBack={() => router.back()} />
+      <TopChromeBar title="Saved payments" subtitle="" />
       <FxCard>
         <ListRow icon="phone-portrait-outline" title="rahul@okaxis" subtitle="Google Pay" right={<Text style={{ color: fx.blue, fontSize: 12, fontWeight: "900" }}>Primary</Text>} />
         <ListRow icon="phone-portrait-outline" title="9876543210@ybl" subtitle="PhonePe" right={<Ionicons name="trash-outline" size={18} color={fx.red} />} />

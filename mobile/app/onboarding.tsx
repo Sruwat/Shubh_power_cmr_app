@@ -24,7 +24,9 @@ const border = "#dde4eb";
 const teal = "#18b9b5";
 
 export default function Onboarding() {
-  const [step, setStep] = useState<Step>("language");
+  const onboardingCompleted = useAuthStore((state) => state.onboardingCompleted);
+  const hydrated = useAuthStore((state) => state.hydrated);
+  const [step, setStep] = useState<Step>("splash");
   const [language, setLanguage] = useState("English");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -51,6 +53,11 @@ export default function Onboarding() {
     return () => clearTimeout(timer);
   }, [step]);
 
+  useEffect(() => {
+    if (!hydrated || !onboardingCompleted) return;
+    router.replace("/(tabs)");
+  }, [hydrated, onboardingCompleted]);
+
   const normalizedPhone = phone.replace(/\D/g, "").slice(0, 10);
   const canSendOtp = normalizedPhone.length === 10;
   const canVerify = otp.replace(/\D/g, "").length >= 4;
@@ -69,7 +76,8 @@ export default function Onboarding() {
       await api.post("/api/v1/auth/request-otp", { phone: normalizedPhone });
       setStep("otp");
     } catch {
-      Alert.alert("OTP request failed", "Please check backend connection and try again.");
+      Alert.alert("OTP request unavailable", "We'll continue in demo mode. Use 1234 to verify.");
+      setStep("otp");
     } finally {
       setLoading(false);
     }
@@ -87,6 +95,12 @@ export default function Onboarding() {
       await setLocalProfile({ phone: normalizedPhone });
       setStep("profile");
     } catch {
+      if (otp.replace(/\D/g, "") === "1234") {
+        await setTokens("demo-access-token", "demo-refresh-token");
+        await setLocalProfile({ phone: normalizedPhone });
+        setStep("profile");
+        return;
+      }
       Alert.alert("Code not verified", "Use demo OTP 1234 while SMS integration is in demo mode.");
     } finally {
       setLoading(false);
@@ -409,70 +423,78 @@ function VehicleScreen(props: {
     { label: "Fleet", icon: "bus" }
   ];
   return (
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 42, paddingBottom: 44 }}>
-      <Text style={styles.vehicleTitle}>Add Your Vehicle</Text>
-      <Text style={styles.subtitle}>We'll show compatible chargers based on your EV</Text>
-      <Pressable accessibilityRole="button" onPress={props.openVehicleCamera} style={[styles.photoCapture, props.photoUri && { borderColor: blue, backgroundColor: paleBlue }]}>
-        {props.photoUri ? <Image source={{ uri: props.photoUri }} style={{ width: 74, height: 58, borderRadius: 12 }} /> : <View style={styles.photoIcon}><Ionicons name="camera-outline" size={26} color={blue} /></View>}
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: navy, fontSize: 16, fontWeight: "900" }}>{props.photoUri ? "Vehicle photo captured" : "Click vehicle photo"}</Text>
-          <Text style={{ color: muted, fontSize: 12 }}>Then confirm brand, model, battery and connector.</Text>
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 32, paddingBottom: 44 }}>
+      <View style={styles.vehicleIntroCard}>
+        <Text style={styles.vehicleTitle}>Add Your Vehicle</Text>
+        <Text style={styles.subtitle}>Vehicle details are required so we can match chargers, connectors, and pricing correctly.</Text>
+        <View style={styles.vehicleRequiredBadge}>
+          <Ionicons name="shield-checkmark" size={14} color={teal} />
+          <Text style={{ color: teal, fontSize: 12, fontWeight: "900" }}>Required onboarding step</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color={blue} />
-      </Pressable>
-      <Label>VEHICLE TYPE</Label>
-      <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+      </View>
+      <View style={styles.vehicleSectionCard}>
+        <Pressable accessibilityRole="button" onPress={props.openVehicleCamera} style={[styles.photoCapture, props.photoUri && { borderColor: blue, backgroundColor: paleBlue }]}>
+          {props.photoUri ? <Image source={{ uri: props.photoUri }} style={{ width: 74, height: 58, borderRadius: 12 }} /> : <View style={styles.photoIcon}><Ionicons name="camera-outline" size={26} color={blue} /></View>}
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: navy, fontSize: 16, fontWeight: "900" }}>{props.photoUri ? "Vehicle photo captured" : "Click vehicle photo"}</Text>
+            <Text style={{ color: muted, fontSize: 12 }}>A photo is optional, but the rest of the vehicle details are saved now.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={blue} />
+        </Pressable>
+        <Label>VEHICLE TYPE</Label>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10 }}>
         {vehicles.map((item) => (
           <Pressable key={item.label} accessibilityRole="button" onPress={() => props.setVehicleKind(item.label)} style={[styles.vehicleType, props.vehicleKind === item.label && styles.vehicleTypeSelected]}>
             <Ionicons name={item.icon} size={24} color={props.vehicleKind === item.label ? blue : muted} />
             <Text style={styles.vehicleTypeText}>{item.label}</Text>
           </Pressable>
         ))}
+        </View>
+        <Label>POPULAR EVS</Label>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingRight: 20, marginTop: 10 }}>
+          {["Tata Nexon EV", "Tata Tiago EV", "MG ZS EV", "Mahindra XUV400"].map((item) => (
+            <Pressable key={item} onPress={() => props.setModel(item)} style={styles.popularChip}>
+              <Text style={{ color: navy, fontWeight: "700" }}>{item}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+        <FieldLabel label="Brand" />
+        <TextInput value={props.brand} onChangeText={props.setBrand} placeholder="e.g. Tata, MG, BYD" placeholderTextColor={faint} style={styles.vehicleInput} />
+        <FieldLabel label="Model" />
+        <TextInput value={props.model} onChangeText={props.setModel} placeholder="e.g. Nexon EV" placeholderTextColor={faint} style={styles.vehicleInput} />
+        <FieldLabel label="Registration number" />
+        <TextInput
+          value={props.registrationNumber}
+          onChangeText={(value) => props.setRegistrationNumber(value.toUpperCase())}
+          placeholder="e.g. DL01AB1234"
+          placeholderTextColor={faint}
+          autoCapitalize="characters"
+          style={styles.vehicleInput}
+        />
+        <FieldLabel label="Battery size (kWh)" />
+        <TextInput
+          value={props.batteryKwh}
+          onChangeText={(value) => props.setBatteryKwh(value.replace(/[^0-9.]/g, "").slice(0, 5))}
+          placeholder="e.g. 40"
+          placeholderTextColor={faint}
+          keyboardType="decimal-pad"
+          style={styles.vehicleInput}
+        />
+        <Label>CONNECTOR TYPE</Label>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10 }}>
+          {(["CCS2", "Type 2", "CHAdeMO"] as ConnectorType[]).map((item) => (
+            <Pressable key={item} accessibilityRole="button" onPress={() => props.setConnector(item)} style={[styles.connector, props.connector === item && styles.connectorSelected]}>
+              <Text style={{ color: props.connector === item ? blue : navy, fontWeight: "800" }}>{item}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <View style={{ marginTop: 18 }}>
+          <PrimaryButton label="Save & Continue" onPress={() => props.finishVehicle(false)} disabled={props.loading} />
+        </View>
+        <Pressable accessibilityRole="button" onPress={() => props.finishVehicle(false)} style={{ alignItems: "center", paddingVertical: 22 }}>
+          <Text style={{ color: faint, fontSize: 15, fontWeight: "800" }}>Continue without photo</Text>
+        </Pressable>
       </View>
-      <Label>POPULAR EVS</Label>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingRight: 20, marginTop: 10 }}>
-        {["Tata Nexon EV", "Tata Tiago EV", "MG ZS EV", "Mahindra XUV400"].map((item) => (
-          <Pressable key={item} onPress={() => props.setModel(item)} style={styles.popularChip}>
-            <Text style={{ color: navy, fontWeight: "700" }}>{item}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-      <FieldLabel label="Brand" />
-      <TextInput value={props.brand} onChangeText={props.setBrand} placeholder="e.g. Tata, MG, BYD" placeholderTextColor={faint} style={styles.vehicleInput} />
-      <FieldLabel label="Model" />
-      <TextInput value={props.model} onChangeText={props.setModel} placeholder="e.g. Nexon EV" placeholderTextColor={faint} style={styles.vehicleInput} />
-      <FieldLabel label="Registration number" />
-      <TextInput
-        value={props.registrationNumber}
-        onChangeText={(value) => props.setRegistrationNumber(value.toUpperCase())}
-        placeholder="e.g. DL01AB1234"
-        placeholderTextColor={faint}
-        autoCapitalize="characters"
-        style={styles.vehicleInput}
-      />
-      <FieldLabel label="Battery size (kWh)" />
-      <TextInput
-        value={props.batteryKwh}
-        onChangeText={(value) => props.setBatteryKwh(value.replace(/[^0-9.]/g, "").slice(0, 5))}
-        placeholder="e.g. 40"
-        placeholderTextColor={faint}
-        keyboardType="decimal-pad"
-        style={styles.vehicleInput}
-      />
-      <Label>CONNECTOR TYPE</Label>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10 }}>
-        {(["CCS2", "Type 2", "CHAdeMO"] as ConnectorType[]).map((item) => (
-          <Pressable key={item} accessibilityRole="button" onPress={() => props.setConnector(item)} style={[styles.connector, props.connector === item && styles.connectorSelected]}>
-            <Text style={{ color: props.connector === item ? blue : navy, fontWeight: "800" }}>{item}</Text>
-          </Pressable>
-        ))}
-      </View>
-      <View style={{ marginTop: 18 }}>
-        <PrimaryButton label="Save & Continue" onPress={() => props.finishVehicle(false)} disabled={props.loading} />
-      </View>
-      <Pressable accessibilityRole="button" onPress={() => props.finishVehicle(true)} style={{ alignItems: "center", paddingVertical: 28 }}>
-        <Text style={{ color: faint, fontSize: 15, fontWeight: "800" }}>Skip for now</Text>
-      </Pressable>
     </ScrollView>
   );
 }
@@ -548,6 +570,33 @@ const styles = {
     fontSize: 26,
     lineHeight: 31,
     fontWeight: "900" as const
+  },
+  vehicleIntroCard: {
+    gap: 12,
+    padding: 18,
+    borderRadius: 18,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: border,
+    shadowColor: "#0b1b33",
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
+  },
+  vehicleSectionCard: {
+    marginTop: 14,
+    gap: 0
+  },
+  vehicleRequiredBadge: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+    alignSelf: "flex-start" as const,
+    borderRadius: 999,
+    backgroundColor: "#e8faf8",
+    paddingHorizontal: 12,
+    paddingVertical: 8
   },
   subtitle: {
     color: muted,
@@ -699,7 +748,7 @@ const styles = {
     justifyContent: "center" as const
   },
   vehicleType: {
-    flex: 1,
+    flexBasis: "48%" as const,
     height: 78,
     borderRadius: 10,
     borderWidth: 1,

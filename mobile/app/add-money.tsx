@@ -3,7 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Alert, Text, View } from "react-native";
 import { api } from "@/api/client";
-import { BackHeader, BottomCta, fx, FxCard, FxScreen, ListRow, Pill } from "@/components/Futuristic";
+import { BottomCta, fx, FxCard, FxScreen, ListRow, Pill } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function AddMoney() {
   const queryClient = useQueryClient();
@@ -17,7 +18,7 @@ export default function AddMoney() {
   });
   return (
     <FxScreen>
-      <BackHeader title="Add Money" onBack={() => router.back()} />
+      <TopChromeBar title="Add money" subtitle="" />
       <FxCard>
         <Text style={{ color: fx.faint, fontSize: 12, fontWeight: "900" }}>ENTER AMOUNT</Text>
         <Text style={{ color: fx.ink, fontSize: 36, fontWeight: "900" }}>Rs 500</Text>

@@ -32,15 +32,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   setLocalProfile: async ({ name, email, phone }) => {
     if (name !== undefined) {
       const normalized = name?.trim() ?? "";
-      normalized ? await SecureStore.setItemAsync("profileName", normalized) : await SecureStore.deleteItemAsync("profileName");
+      if (normalized) await SecureStore.setItemAsync("profileName", normalized);
+      else await SecureStore.deleteItemAsync("profileName");
     }
     if (email !== undefined) {
       const normalized = email?.trim() ?? "";
-      normalized ? await SecureStore.setItemAsync("profileEmail", normalized) : await SecureStore.deleteItemAsync("profileEmail");
+      if (normalized) await SecureStore.setItemAsync("profileEmail", normalized);
+      else await SecureStore.deleteItemAsync("profileEmail");
     }
     if (phone !== undefined) {
       const normalized = phone?.replace(/\D/g, "").slice(0, 10) ?? "";
-      normalized ? await SecureStore.setItemAsync("profilePhone", normalized) : await SecureStore.deleteItemAsync("profilePhone");
+      if (normalized) await SecureStore.setItemAsync("profilePhone", normalized);
+      else await SecureStore.deleteItemAsync("profilePhone");
     }
     set((state) => ({
       profileName: name !== undefined ? name?.trim() || null : state.profileName,

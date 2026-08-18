@@ -1,11 +1,12 @@
 import { router } from "expo-router";
 import { Text, View } from "react-native";
-import { BackHeader, BottomCta, fx, FxInput, FxScreen } from "@/components/Futuristic";
+import { BottomCta, fx, FxInput, FxScreen } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function CardPayment() {
   return (
     <FxScreen>
-      <BackHeader title="Card Payment" onBack={() => router.back()} />
+      <TopChromeBar title="Card payment" subtitle="" />
       <View style={{ backgroundColor: fx.blue2, borderRadius: 20, padding: 22, gap: 18 }}>
         <Text style={{ color: "#fff", fontWeight: "900" }}>Visa</Text>
         <Text style={{ color: "#fff", fontSize: 24, letterSpacing: 4 }}>•••• •••• •••• ••••</Text>

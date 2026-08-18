@@ -1,13 +1,14 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import { Text } from "react-native";
-import { BackHeader, BottomCta, fx, FxCard, FxInput, FxScreen, ListRow } from "@/components/Futuristic";
+import { BottomCta, fx, FxCard, FxInput, FxScreen, ListRow } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function PayUpi() {
   const [upi, setUpi] = useState("");
   return (
     <FxScreen>
-      <BackHeader title="Pay via UPI" onBack={() => router.back()} />
+      <TopChromeBar title="Pay via UPI" subtitle="" />
       <FxCard>
         <Text style={{ color: fx.ink, fontWeight: "900" }}>Enter UPI ID</Text>
         <FxInput value={upi} onChangeText={setUpi} placeholder="yourname@okaxis" autoCapitalize="none" />

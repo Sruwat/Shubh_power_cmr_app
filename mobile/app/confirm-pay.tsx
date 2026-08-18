@@ -3,7 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Alert, Text, View } from "react-native";
 import { api } from "@/api/client";
-import { BackHeader, BottomCta, fx, FxCard, FxScreen, ListRow } from "@/components/Futuristic";
+import { BottomCta, fx, FxCard, FxScreen, ListRow } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function ConfirmPay() {
   const start = useMutation({
@@ -21,7 +22,11 @@ export default function ConfirmPay() {
 
   return (
     <FxScreen>
-      <BackHeader title="Confirm & Pay" onBack={() => router.back()} />
+      <TopChromeBar title="Authorize payment" subtitle="" />
+      <Text style={{ color: fx.faint, fontSize: 12, fontWeight: "900" }}>2/3</Text>
+      <Text style={{ color: fx.faint, fontSize: 12, fontWeight: "900" }}>SHUBHPAY ZERO-WALLET</Text>
+      <Text style={{ color: fx.ink, fontSize: 28, lineHeight: 32, fontWeight: "900" }}>Pay only for what you use</Text>
+      <Text style={{ color: fx.muted, lineHeight: 22 }}>No wallet top-up. Unused authorized amount is released.</Text>
       <FxCard>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: fx.teal, marginTop: 5 }} />
@@ -36,12 +41,12 @@ export default function ConfirmPay() {
         </View>
       </FxCard>
       <FxCard>
-        <Text style={{ color: fx.ink, fontSize: 17, fontWeight: "900" }}>Cost Breakdown</Text>
+        <Text style={{ color: fx.ink, fontSize: 17, fontWeight: "900" }}>Payment method</Text>
         <Row label="Energy (est. 20 kWh x Rs18)" value="Rs360" />
         <Row label="Platform Fee" value="Rs35" />
         <Row label="GST @ 18%" value="Rs71" />
         <Row label="Auth Deduction" value="Rs466" strong />
-        <Text style={{ color: fx.faint, fontSize: 12 }}>Actual amount = energy used x tariff + fees. Difference refunded instantly.</Text>
+        <Text style={{ color: fx.faint, fontSize: 12 }}>₹600 will be temporarily authorized. Final capture happens after the session based on actual energy consumed.</Text>
       </FxCard>
       <Text style={{ color: fx.ink, fontWeight: "900" }}>Pay Via</Text>
       <FxCard>
@@ -49,7 +54,7 @@ export default function ConfirmPay() {
         <ListRow icon="phone-portrait-outline" title="UPI" subtitle="rahul@okaxis" onPress={() => router.push("/pay-upi")} right={<Ionicons name="radio-button-off" size={23} color={fx.faint} />} />
         <ListRow icon="card-outline" title="Credit / Debit Card" subtitle="•••• 4242" onPress={() => router.push("/card-payment")} right={<Ionicons name="radio-button-off" size={23} color={fx.faint} />} />
       </FxCard>
-      <BottomCta label="Start Charging - Rs466" onPress={() => start.mutate()} />
+      <BottomCta label="Authorize up to ₹600" onPress={() => start.mutate()} />
     </FxScreen>
   );
 }

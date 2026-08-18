@@ -6,7 +6,8 @@ import type { ComponentProps } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { api } from "@/api/client";
-import { BackHeader, Cta, fx, FxCard, FxInput, FxScreen, Pill, SectionLabel } from "@/components/Futuristic";
+import { Cta, fx, FxCard, FxInput, FxScreen, Pill, SectionLabel } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 type VehicleKind = "2-Wheeler" | "3-Wheeler" | "Car" | "Fleet";
 
@@ -100,9 +101,30 @@ export default function Vehicles() {
 
   return (
     <FxScreen>
-      <BackHeader title={adding ? "Add Your Vehicle" : `My Vehicles (${vehicles.data?.length ?? 0})`} onBack={() => adding ? setAdding(false) : router.back()} />
+      <TopChromeBar title={adding ? "Add your vehicle" : `My vehicles (${vehicles.data?.length ?? 0})`} subtitle="" />
       {!adding ? (
         <>
+          <FxCard style={{ backgroundColor: fx.blue2 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+              <View style={{ width: 60, height: 60, borderRadius: 24, backgroundColor: "#1f66d3", alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ color: "#fff", fontSize: 24, fontWeight: "900" }}>SS</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: "#fff", fontSize: 20, fontWeight: "900" }}>Shankaranand Saraswati</Text>
+                <Text style={{ color: "#dbe7ff", fontSize: 12 }}>+91 9876543210 · Tata Nexon EV</Text>
+              </View>
+              <Pressable accessibilityRole="button" onPress={() => router.push("/profile-edit")} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.16)", alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="create-outline" size={18} color="#fff" />
+              </Pressable>
+            </View>
+          </FxCard>
+          <FxCard style={{ paddingVertical: 0 }}>
+            <View style={{ flexDirection: "row" }}>
+              <MiniStat label="Vehicles" value={String(vehicles.data?.length ?? 0)} />
+              <MiniStat label="Primary" value="1" />
+              <MiniStat label="Compatible" value="4" />
+            </View>
+          </FxCard>
           {vehicles.data?.length ? vehicles.data.map((vehicle) => (
             <FxCard key={String(vehicle.vehicle_id ?? vehicle.id ?? vehicle.name)}>
               <View style={{ flexDirection: "row", gap: 13, alignItems: "center" }}>
@@ -187,6 +209,15 @@ export default function Vehicles() {
         </>
       )}
     </FxScreen>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={{ flex: 1, alignItems: "center", paddingVertical: 12, borderRightWidth: 1, borderRightColor: fx.line }}>
+      <Text style={{ color: fx.ink, fontSize: 16, fontWeight: "900" }}>{value}</Text>
+      <Text style={{ color: fx.muted, fontSize: 10, fontWeight: "700" }}>{label}</Text>
+    </View>
   );
 }
 

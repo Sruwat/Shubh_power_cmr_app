@@ -1,12 +1,13 @@
 import { router } from "expo-router";
 import { Text, View } from "react-native";
-import { BackHeader, EnergyCard, fx, FxCard, FxScreen, StatTile } from "@/components/Futuristic";
+import { EnergyCard, fx, FxCard, FxScreen, StatTile } from "@/components/Futuristic";
 import { chargingHistory } from "@/data/experience";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function History() {
   return (
     <FxScreen>
-      <BackHeader title="Charging History" onBack={() => router.back()} />
+      <TopChromeBar title="Charging history" subtitle="" />
       <EnergyCard style={{ padding: 14 }}>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <StatTile label="Sessions" value="12" tone="navy" />

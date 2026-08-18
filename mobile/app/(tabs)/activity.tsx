@@ -1,77 +1,195 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Alert, Text, View } from "react-native";
-import { api } from "@/api/client";
-import { Cta, EnergyCard, fx, FxCard, FxHeader, FxScreen, Pill } from "@/components/Futuristic";
+import { Pressable, Text, View } from "react-native";
+import { fx, FxCard, FxScreen } from "@/components/Futuristic";
 import { walletTransactions } from "@/data/experience";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function Wallet() {
-  const queryClient = useQueryClient();
-  const wallet = useQuery({ queryKey: ["wallet"], queryFn: async () => (await api.get("/api/v1/wallet")).data, retry: false });
-  const topUp = useMutation({
-    mutationFn: async (amount: number) => (await api.post("/api/v1/wallet/top-up", { amount_inr: amount, idempotency_key: `topup-${Date.now()}` })).data,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["wallet"] });
-      Alert.alert("Money added", "Wallet balance has been updated.");
-    },
-    onError: () => Alert.alert("Demo wallet", "Backend is offline, so this top-up is shown in demo mode.")
-  });
-
   return (
     <FxScreen>
-      <FxHeader title="Wallet" subtitle="Balance, bookings and payments" menuPress={() => router.push("/menu")} />
-      <EnergyCard style={{ backgroundColor: fx.blue2 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <View>
-            <Text style={{ color: "#dbe7ff", fontWeight: "800" }}>Wallet Balance</Text>
-            <Text style={{ color: "#fff", fontSize: 38, lineHeight: 44, fontWeight: "900" }}>Rs {wallet.data?.balance_inr ?? 840}</Text>
-          </View>
-          <View style={{ width: 50, height: 50, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.16)", alignItems: "center", justifyContent: "center" }}>
-            <Ionicons name="card-outline" size={24} color="#fff" />
+      <TopChromeBar subtitle="" />
+      <View style={styles.topPad}>
+        <View style={styles.heroCard}>
+          <Text style={styles.heroKicker}>SHUBHPAY</Text>
+          <Text style={styles.heroTitle}>No recharge. No wallet.{`\n`}Just charge.</Text>
+          <Text style={styles.heroSub}>Authorize once, then pay the exact final amount.</Text>
+          <View style={styles.heroPill}>
+            <Ionicons name="shield-checkmark-outline" size={12} color="#fff" />
+            <Text style={styles.heroPillText}>₹1,834 saved from being trapped in top-up wallets</Text>
           </View>
         </View>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <Pill label="Active" tone="teal" selected />
-          <Pill label="Auto top-up: OFF" />
-        </View>
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          <View style={{ flex: 1 }}><Cta label="+ Add Money" kind="secondary" onPress={() => router.push("/add-money")} /></View>
-          <View style={{ flex: 1 }}><Cta label="Transfer" kind="teal" onPress={() => router.push("/payments")} /></View>
-        </View>
-      </EnergyCard>
 
-      <Text style={{ color: fx.faint, fontSize: 12, fontWeight: "900" }}>QUICK ADD</Text>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        {[100, 200, 500, 1000].map((amount) => (
-          <View key={amount} style={{ flex: 1 }}>
-            <Cta label={`Rs${amount}`} kind="secondary" onPress={() => topUp.mutate(amount)} />
+        <View style={styles.tilesRow}>
+          <ActionTile icon="card-outline" title="Payment methods" subtitle="UPI & cards" onPress={() => router.push("/payments")} />
+          <ActionTile icon="document-text-outline" title="OneBill" subtitle="All invoices" onPress={() => router.push("/onebill")} />
+          <ActionTile icon="star-outline" title="Rewards" subtitle="240 Miles" onPress={() => router.push("/rewards")} />
+        </View>
+
+        <FxCard style={styles.paymentsCard}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardHeader}>Recent payments</Text>
+            <Text onPress={() => router.push("/history")} style={styles.viewAll}>View all</Text>
           </View>
-        ))}
-      </View>
-
-      <FxCard style={{ backgroundColor: "#f6f2e8" }}>
-        <Text style={{ color: "#8a6500", fontWeight: "800" }}>Keep Rs200 wallet balance for uninterrupted charging</Text>
-      </FxCard>
-
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-        <Text style={{ color: fx.faint, fontSize: 12, fontWeight: "900" }}>TRANSACTIONS</Text>
-        <Text onPress={() => router.push("/history")} style={{ color: fx.blue, fontWeight: "900" }}>View All</Text>
-      </View>
-      <FxCard style={{ paddingVertical: 6 }}>
-        {walletTransactions.map((item) => (
-          <View key={`${item.title}-${item.time}`} style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: fx.line }}>
-            <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: item.amount.startsWith("+") ? "#e3f8f4" : fx.cyan, alignItems: "center", justifyContent: "center" }}>
-              <Ionicons name={item.amount.startsWith("+") ? "arrow-down" : "flash"} size={18} color={item.amount.startsWith("+") ? fx.teal : fx.blue} />
+          {walletTransactions.slice(0, 3).map((item, index) => (
+            <View key={`${item.title}-${item.time}`} style={[styles.paymentRow, index === 2 && { borderBottomWidth: 0 }]}>
+              <View style={styles.paymentAvatar}>
+                <Text style={styles.paymentAvatarText}>{item.title[0]}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.paymentTitle}>{item.title}</Text>
+                <Text style={styles.paymentMeta}>{item.time} · Exact paid</Text>
+              </View>
+              <Text style={styles.paymentAmount}>{item.amount.replace("+", "₹")}</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: fx.ink, fontWeight: "900" }}>{item.title}</Text>
-              <Text style={{ color: fx.faint, fontSize: 12 }}>{item.time}</Text>
-            </View>
-            <Text style={{ color: item.amount.startsWith("+") ? fx.teal : fx.ink, fontWeight: "900" }}>{item.amount}</Text>
-          </View>
-        ))}
-      </FxCard>
+          ))}
+        </FxCard>
+      </View>
     </FxScreen>
   );
 }
+
+function ActionTile({ icon, title, subtitle, onPress }: { icon: keyof typeof Ionicons.glyphMap; title: string; subtitle: string; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.actionTile, pressed && { opacity: 0.88 }]}>
+      <FxCard style={styles.actionTileInner}>
+        <Ionicons name={icon} size={22} color={fx.blue} />
+        <Text style={styles.actionTitle}>{title}</Text>
+        <Text style={styles.actionSubtitle}>{subtitle}</Text>
+      </FxCard>
+    </Pressable>
+  );
+}
+
+const styles = {
+  topPad: {
+    paddingHorizontal: 16,
+    gap: 12
+  },
+  heroCard: {
+    borderRadius: 18,
+    backgroundColor: "#0a67d1",
+    padding: 16,
+    gap: 8,
+    shadowColor: "#0b1b33",
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3
+  },
+  heroKicker: {
+    color: "#d4f0ff",
+    fontSize: 11,
+    fontWeight: "900" as const,
+    letterSpacing: 1.3
+  },
+  heroTitle: {
+    color: "#fff",
+    fontSize: 27,
+    lineHeight: 31,
+    fontWeight: "500" as const
+  },
+  heroSub: {
+    color: "#cfe6ff",
+    fontSize: 11,
+    fontWeight: "700" as const
+  },
+  heroPill: {
+    marginTop: 4,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6
+  },
+  heroPillText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "800" as const
+  },
+  tilesRow: {
+    flexDirection: "row" as const,
+    gap: 10
+  },
+  actionTile: {
+    flex: 1,
+    minHeight: 88
+  },
+  actionTileInner: {
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    minHeight: 88,
+    paddingVertical: 14,
+    gap: 5
+  },
+  actionTitle: {
+    color: fx.ink,
+    fontSize: 12,
+    fontWeight: "900" as const,
+    textAlign: "center" as const
+  },
+  actionSubtitle: {
+    color: fx.muted,
+    fontSize: 10,
+    fontWeight: "700" as const,
+    textAlign: "center" as const
+  },
+  paymentsCard: {
+    gap: 0,
+    paddingVertical: 14
+  },
+  cardHeaderRow: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+    paddingHorizontal: 2,
+    paddingBottom: 10
+  },
+  cardHeader: {
+    color: fx.ink,
+    fontSize: 16,
+    fontWeight: "900" as const
+  },
+  viewAll: {
+    color: fx.blue,
+    fontSize: 12,
+    fontWeight: "900" as const
+  },
+  paymentRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: fx.line
+  },
+  paymentAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "#eaf2ff",
+    alignItems: "center" as const,
+    justifyContent: "center" as const
+  },
+  paymentAvatarText: {
+    color: fx.blue,
+    fontWeight: "900" as const
+  },
+  paymentTitle: {
+    color: fx.ink,
+    fontSize: 13,
+    fontWeight: "900" as const
+  },
+  paymentMeta: {
+    color: "#8b94a7",
+    fontSize: 10,
+    fontWeight: "700" as const
+  },
+  paymentAmount: {
+    color: fx.ink,
+    fontSize: 13,
+    fontWeight: "900" as const
+  }
+};

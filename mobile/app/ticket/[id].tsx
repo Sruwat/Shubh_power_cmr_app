@@ -1,14 +1,15 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { BackHeader, fx, FxCard, FxScreen } from "@/components/Futuristic";
+import { fx, FxCard, FxScreen } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function TicketConversation() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [message, setMessage] = useState("");
   return (
     <FxScreen>
-      <BackHeader title={id ?? "TKT-001"} onBack={() => router.back()} right={<Text style={{ color: fx.teal, fontWeight: "900" }}>Resolved</Text>} />
+      <TopChromeBar title={id ?? "TKT-001"} subtitle="" />
       <FxCard>
         <Text style={{ color: fx.ink, fontWeight: "900" }}>CCS2 connector fault at Sector 62</Text>
         <Text style={{ color: fx.faint }}>Created 12 Jul - Category: Hardware Fault - Priority: High</Text>

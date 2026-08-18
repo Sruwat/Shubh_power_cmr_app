@@ -3,7 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Alert, Pressable, Text, View } from "react-native";
 import { api } from "@/api/client";
-import { BackHeader, Cta, EnergyCard, fx, FxCard, FxScreen } from "@/components/Futuristic";
+import { Cta, EnergyCard, fx, FxCard, FxScreen } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 import { supportTickets } from "@/data/experience";
 
 export default function Support() {
@@ -14,7 +15,7 @@ export default function Support() {
   });
   return (
     <FxScreen>
-      <BackHeader title="Support" onBack={() => router.back()} />
+      <TopChromeBar title="Help & support" subtitle="" />
       <EnergyCard style={{ backgroundColor: fx.blue2 }}>
         <Text style={{ color: "#fff", fontSize: 18, fontWeight: "900" }}>Need help?</Text>
         <Text style={{ color: "#dbe7ff", lineHeight: 21 }}>Our support team is available 24/7 for charging issues.</Text>
@@ -37,6 +38,18 @@ export default function Support() {
           </Pressable>
         ))}
       </View>
+      <FxCard style={{ gap: 0, paddingVertical: 10 }}>
+        <Text style={{ color: fx.ink, fontSize: 16, fontWeight: "900", paddingHorizontal: 2, paddingBottom: 10 }}>My tickets</Text>
+        {supportTickets.slice(0, 2).map((item) => (
+          <Pressable key={item.id} onPress={() => router.push(`/ticket/${item.id}`)} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: fx.line, paddingVertical: 12 }}>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={{ color: fx.ink, fontWeight: "900" }}>{item.title}</Text>
+              <Text style={{ color: fx.muted, fontSize: 11 }}>{item.meta}</Text>
+            </View>
+            <Text style={{ color: item.status === "Open" ? fx.blue : fx.teal, fontWeight: "900" }}>{item.status}</Text>
+          </Pressable>
+        ))}
+      </FxCard>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Text style={{ color: fx.faint, fontSize: 12, fontWeight: "900" }}>MY TICKETS</Text>
         <Text onPress={() => ticket.mutate()} style={{ color: fx.blue, fontWeight: "900" }}>+ New Ticket</Text>

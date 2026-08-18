@@ -4,10 +4,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Alert, Image, Pressable, Text, View } from "react-native";
 import { api, distanceLabel, Station } from "@/api/client";
-import { BackHeader, Cta, EnergyCard, fx, FxCard, FxScreen, Pill, SectionLabel, StatTile } from "@/components/Futuristic";
+import { Cta, EnergyCard, fx, FxCard, FxScreen, Pill, SectionLabel, StatTile } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 import { selectedStation, stations } from "@/data/experience";
 import { withPresentation } from "@/data/presentation";
 import { openGoogleMapsDirections } from "@/utils/maps";
+import shubhMark from "../../assets/shubh-power-mark.png";
 
 export default function StationDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -33,21 +35,27 @@ export default function StationDetail() {
 
   return (
     <FxScreen>
-      <BackHeader title="Station details" onBack={() => router.back()} right={<Pressable onPress={() => saveStation.mutate()} style={{ padding: 8 }}><Ionicons name="heart-outline" size={25} color={fx.ink} /></Pressable>} />
+      <TopChromeBar title="Station details" subtitle="" />
 
-      <EnergyCard>
-        <View style={{ alignSelf: "flex-start", borderRadius: 999, backgroundColor: fx.cyan, paddingHorizontal: 12, paddingVertical: 8 }}>
-          <Text style={{ color: fx.teal, fontWeight: "900" }}>Charging available</Text>
+      <EnergyCard style={{ backgroundColor: fx.blue2, gap: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+          <View style={{ alignSelf: "flex-start", borderRadius: 999, backgroundColor: "rgba(255,255,255,0.14)", paddingHorizontal: 12, paddingVertical: 8 }}>
+            <Text style={{ color: "#fff", fontWeight: "900" }}>Charging available</Text>
+          </View>
+          <Pressable onPress={() => saveStation.mutate()} style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" }}>
+            <Ionicons name="heart-outline" size={20} color="#fff" />
+          </Pressable>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          {isShubh ? <Image source={require("../../assets/shubh-power-mark.png")} resizeMode="contain" style={{ width: 38, height: 38 }} /> : null}
-          <Text style={{ color: "#fff", fontSize: 30, lineHeight: 36, fontWeight: "900", flex: 1 }}>{item.name}</Text>
+          {isShubh ? <Image source={shubhMark} resizeMode="contain" style={{ width: 38, height: 38 }} /> : null}
+          <Text style={{ color: "#fff", fontSize: 28, lineHeight: 34, fontWeight: "900", flex: 1 }}>{item.name}</Text>
         </View>
-        <Text style={{ color: "#dbe7ff", fontSize: 16, fontWeight: "700" }}>{item.brand} - {distanceLabel(item)}</Text>
-        {item.societyName ? <Text style={{ color: fx.sky, fontSize: 13, fontWeight: "900" }}>Private hub: {item.societyName}</Text> : null}
+        <Text style={{ color: "#dbe7ff", fontSize: 15, fontWeight: "700" }}>{item.brand} · {distanceLabel(item)}</Text>
+        {item.societyName ? <Text style={{ color: "#c8e4ff", fontSize: 13, fontWeight: "900" }}>Private hub: {item.societyName}</Text> : null}
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
           <Pill label="Connector details updating" selected />
           <Pill label="Tariff updates at station" />
+          <Pill label={item.pricePerKwh ? `Rs ${item.pricePerKwh}/kWh` : "Pay at station"} tone="teal" />
         </View>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <View style={{ flex: 1 }}><Cta label="Navigate" icon="navigate-outline" kind="secondary" onPress={() => void openGoogleMapsDirections(item)} /></View>
@@ -55,7 +63,7 @@ export default function StationDetail() {
         </View>
       </EnergyCard>
 
-      <View style={{ flexDirection: "row", gap: 8 }}>
+      <View style={{ flexDirection: "row", gap: 8, paddingTop: 2 }}>
         <Pill label="Info" selected={tab === "info"} onPress={() => setTab("info")} />
         <Pill label="Chargers" selected={tab === "chargers"} onPress={() => setTab("chargers")} />
         <Pill label="Reviews" selected={tab === "reviews"} onPress={() => setTab("reviews")} />
@@ -63,8 +71,11 @@ export default function StationDetail() {
 
       {tab === "info" ? (
         <>
-          <FxCard>
-            <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Charging options</Text>
+          <FxCard style={{ gap: 12 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <Text style={{ color: fx.ink, fontSize: 18, fontWeight: "900" }}>Charging options</Text>
+              <Pill label={item.operational_status || "Live"} selected />
+            </View>
             <View style={{ flexDirection: "row", gap: 12 }}>
               <StatTile label="Power" value={item.powerLabel || "50 kW"} />
               <StatTile label="Tariff" value={`Rs ${item.pricePerKwh ?? 18}`} tone="teal" />
@@ -79,8 +90,8 @@ export default function StationDetail() {
             <Cta label="Select Connector" icon="flash-outline" onPress={() => setTab("chargers")} />
           </FxCard>
 
-          <FxCard>
-            <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Location and access</Text>
+          <FxCard style={{ gap: 10 }}>
+            <Text style={{ color: fx.ink, fontSize: 18, fontWeight: "900" }}>Location and access</Text>
             <Text style={{ color: fx.muted, lineHeight: 22 }}>{item.address || "Navigation is available for this station."}</Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
               {(item.amenities || ["Parking nearby", "Support available", "Public access"]).map((label) => <Pill key={label} label={label} />)}
@@ -88,8 +99,8 @@ export default function StationDetail() {
             <Cta label="Open maps" icon="navigate-outline" kind="secondary" onPress={() => void openGoogleMapsDirections(item)} />
           </FxCard>
 
-          <FxCard>
-            <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Tariff breakdown</Text>
+          <FxCard style={{ gap: 0, paddingVertical: 12 }}>
+            <Text style={{ color: fx.ink, fontSize: 18, fontWeight: "900", paddingHorizontal: 14, paddingBottom: 6 }}>Tariff breakdown</Text>
             <PriceRow label="Energy Rate" value={`Rs ${item.pricePerKwh}/kWh`} />
             <PriceRow label="Platform Fee" value={`Rs ${item.platformFee} flat`} />
             <PriceRow label="GST (18%)" value="Incl. in above" />
@@ -97,8 +108,8 @@ export default function StationDetail() {
             <PriceRow label="Parking" value={item.parkingFee} />
           </FxCard>
 
-          <FxCard>
-            <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Before you start</Text>
+          <FxCard style={{ gap: 10 }}>
+            <Text style={{ color: fx.ink, fontSize: 18, fontWeight: "900" }}>Before you start</Text>
             <Text style={{ color: fx.muted, lineHeight: 22 }}>Confirm connector availability at the station, review tariff information and keep your payment method ready.</Text>
             <Cta label="Book Charging Slot" icon="calendar-outline" onPress={() => router.push("/book-slot")} />
             <Pressable accessibilityRole="button" onPress={() => reportIssue.mutate()} style={{ alignItems: "center", paddingVertical: 8 }}>

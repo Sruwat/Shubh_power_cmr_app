@@ -3,18 +3,18 @@ import { router } from "expo-router";
 import { Image, Linking, Pressable, Text, View } from "react-native";
 import { customerStationStatus, distanceLabel, Station } from "@/api/client";
 import { fx } from "@/components/Futuristic";
+import shubhMark from "../../assets/shubh-power-mark.png";
 
 export function StationCard({ station, compact = false }: { station: Station; compact?: boolean }) {
   const connectors = [...new Set(station.connectorDetails?.map((item) => item.type) ?? ["CCS2"])].slice(0, 3);
   const isBusy = (station.availabilityLabel || "").toLowerCase().includes("busy") || (station.availabilityLabel || "").toLowerCase().includes("full");
   const status = customerStationStatus(station);
-  const isShubh = station.isShubhHub || /shu?bh/i.test(`${station.brand} ${station.name}`);
   return (
     <Pressable accessibilityRole="button" onPress={() => router.push(`/station/${station.id}`)} style={{ backgroundColor: fx.card, borderRadius: 16, borderWidth: 1, borderColor: fx.line, padding: 16, gap: 10, shadowColor: "#0b1b33", shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
         <View style={{ flex: 1, gap: 3 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
-            {isShubh ? <Image source={require("../../assets/shubh-power-mark.png")} resizeMode="contain" style={{ width: 22, height: 22 }} /> : null}
+            {brandBadge(station)}
             <Text style={{ color: fx.ink, fontSize: 17, lineHeight: 21, fontWeight: "900", flex: 1 }} numberOfLines={2}>{station.name}</Text>
           </View>
           <Text style={{ color: fx.muted, fontSize: 12, fontWeight: "700" }} numberOfLines={1}>{station.area || station.brand}</Text>
@@ -52,6 +52,15 @@ export function StationCard({ station, compact = false }: { station: Station; co
       )}
     </Pressable>
   );
+}
+
+function brandBadge(station: Station) {
+  const brand = `${station.brand ?? station.name ?? ""}`.toLowerCase();
+  if (/shubh/.test(brand) || station.isShubhHub) return <Image source={shubhMark} resizeMode="contain" style={{ width: 22, height: 22 }} />;
+  if (/tata/.test(brand)) return <Image source={{ uri: "https://logo.clearbit.com/tatapower.com" }} resizeMode="contain" style={{ width: 20, height: 20 }} />;
+  if (/statiq/.test(brand)) return <Image source={{ uri: "https://logo.clearbit.com/statiq.in" }} resizeMode="contain" style={{ width: 20, height: 20 }} />;
+  if (/jio-bp|jio bp|jio/.test(brand)) return <Image source={{ uri: "https://logo.clearbit.com/jiobp.com" }} resizeMode="contain" style={{ width: 20, height: 20 }} />;
+  return <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: fx.blue, alignItems: "center", justifyContent: "center" }}><Text style={{ color: "#fff", fontSize: 10, fontWeight: "900" }}>{(station.brand ?? station.name ?? "S").slice(0, 1).toUpperCase()}</Text></View>;
 }
 
 function Meta({ icon, label, color }: { icon: keyof typeof Ionicons.glyphMap; label: string; color: string }) {

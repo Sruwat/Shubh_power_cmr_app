@@ -3,7 +3,6 @@ import { ActivityIndicator, View } from "react-native";
 import { useAuthStore } from "@/store/auth";
 
 export default function Index() {
-  const token = useAuthStore((state) => state.accessToken);
   const hydrated = useAuthStore((state) => state.hydrated);
   const onboardingCompleted = useAuthStore((state) => state.onboardingCompleted);
   if (!hydrated) {
@@ -13,5 +12,5 @@ export default function Index() {
       </View>
     );
   }
-  return <Redirect href={token || onboardingCompleted ? "/(tabs)" : "/onboarding"} />;
+  return <Redirect href={onboardingCompleted ? "/(tabs)" : "/onboarding"} />;
 }

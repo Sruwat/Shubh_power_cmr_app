@@ -32,6 +32,11 @@
         "NSCameraUsageDescription": "Shubh Power uses the camera to scan charger QR codes."
       }
     },
+    "updates": {
+      "enabled": false,
+      "checkAutomatically": "NEVER",
+      "fallbackToCacheTimeout": 0
+    },
     "plugins": [
       "expo-router",
       "expo-secure-store",

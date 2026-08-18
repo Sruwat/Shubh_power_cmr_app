@@ -2,11 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Text, TextInput, View } from "react-native";
-import { BackHeader, fx, FxCard, FxScreen, ListRow, Pill } from "@/components/Futuristic";
+import { fx, FxCard, FxScreen, ListRow, Pill } from "@/components/Futuristic";
 import { StationCard } from "@/components/StationCard";
 import { stations } from "@/data/experience";
 import { importedStationFallback } from "@/data/presentation";
 import { applyStationFilters } from "@/features/useStations";
+import { TopChromeBar } from "@/components/ShubhShell";
 import { useStationFilters } from "@/store/stationFilters";
 
 export default function SearchScreen() {
@@ -20,7 +21,7 @@ export default function SearchScreen() {
 
   return (
     <FxScreen>
-      <BackHeader title="Search" onBack={() => router.back()} />
+      <TopChromeBar title="Search" subtitle="" />
       <View style={{ minHeight: 54, borderRadius: 15, borderWidth: 1, borderColor: fx.blue, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", paddingHorizontal: 13, gap: 10 }}>
         <Ionicons name="search-outline" size={19} color={fx.faint} />
         <TextInput value={query} onChangeText={setQuery} placeholder="Search station, address, area..." placeholderTextColor={fx.faint} autoFocus style={{ flex: 1, color: fx.ink, fontWeight: "800" }} />

@@ -1,7 +1,8 @@
 import { router } from "expo-router";
 import { Text, View } from "react-native";
-import { BackHeader, Cta, fx, FxCard, FxScreen, Pill } from "@/components/Futuristic";
+import { Cta, fx, FxCard, FxScreen, Pill } from "@/components/Futuristic";
 import { useStationFilters } from "@/store/stationFilters";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 const connectors = ["CCS2", "Type 2", "CHAdeMO", "Bharat AC001", "Bharat DC001", "15A Socket"];
 const ratings = ["3+", "3.5+", "4+", "4.5+"];
@@ -14,7 +15,7 @@ export default function Filters() {
   const filters = useStationFilters();
   return (
     <FxScreen>
-      <BackHeader title="Filters" onBack={() => router.back()} />
+      <TopChromeBar title="Filters" subtitle="" />
       <FxCard>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}><Text style={{ color: fx.ink, fontWeight: "900" }}>Max Distance</Text><Text style={{ color: fx.blue, fontWeight: "900" }}>{filters.radiusKm} km</Text></View>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{[5, 8, 15, 30].map((km) => <Pill key={km} label={`${km} km`} selected={filters.radiusKm === km} onPress={() => filters.setRadiusKm(km)} />)}</View>

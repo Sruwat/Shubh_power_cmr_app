@@ -3,7 +3,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { api } from "@/api/client";
-import { BackHeader, Cta, EnergyCard, fx, FxCard, FxScreen, StatTile } from "@/components/Futuristic";
+import { Cta, EnergyCard, fx, FxCard, FxScreen, StatTile } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function ChargingSession() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
@@ -22,20 +23,24 @@ export default function ChargingSession() {
 
   return (
     <FxScreen>
-      <BackHeader title="Live Charging" onBack={() => router.back()} />
-      <EnergyCard style={{ alignItems: "center" }}>
+      <TopChromeBar title="Live charging" subtitle="" />
+      <EnergyCard style={{ alignItems: "center", gap: 12 }}>
         <View style={{ width: 92, height: 92, borderRadius: 46, backgroundColor: "rgba(35,196,181,0.22)", alignItems: "center", justifyContent: "center" }}>
           <Ionicons name="flash" size={46} color={fx.teal} />
         </View>
         <Text style={{ color: "#fff", fontSize: 40, lineHeight: 46, fontWeight: "900" }}>{energy} kWh</Text>
         <Text style={{ color: "#dbe7ff", fontWeight: "800" }}>Charging in progress - CP01 CCS2</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
+          <View style={{ borderRadius: 999, backgroundColor: "rgba(255,255,255,0.14)", paddingHorizontal: 10, paddingVertical: 6 }}><Text style={{ color: "#fff", fontSize: 11, fontWeight: "900" }}>Live session</Text></View>
+          <View style={{ borderRadius: 999, backgroundColor: "rgba(255,255,255,0.14)", paddingHorizontal: 10, paddingVertical: 6 }}><Text style={{ color: "#fff", fontSize: 11, fontWeight: "900" }}>Auto updates on</Text></View>
+        </View>
         <View style={{ flexDirection: "row", gap: 10, width: "100%" }}>
           <StatTile label="Power" value={`${session.data?.power_kw ?? 49.8} kW`} />
           <StatTile label="Cost" value={`Rs ${cost}`} tone="teal" />
           <StatTile label="Battery" value="72%" tone="navy" />
         </View>
       </EnergyCard>
-      <FxCard>
+      <FxCard style={{ gap: 8 }}>
         <Text style={{ color: fx.ink, fontSize: 20, fontWeight: "900" }}>Session controls</Text>
         <Text style={{ color: fx.muted, lineHeight: 22 }}>Keep the vehicle connected until you stop the session or the charger completes charging.</Text>
         <View style={{ flexDirection: "row", gap: 12 }}>

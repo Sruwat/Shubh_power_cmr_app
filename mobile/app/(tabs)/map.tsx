@@ -1,99 +1,83 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
-import { Station, distanceLabel } from "@/api/client";
+import { useMemo, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { StationMap } from "@/components/StationMap";
-import { CircleButton, Cta, fx, HeaderLogoBadge, Pill, SearchBar } from "@/components/Futuristic";
+import { fx, FxScreen } from "@/components/Futuristic";
 import { stations as demoStations } from "@/data/experience";
 import { useNearbyStations } from "@/features/useStations";
-import { openGoogleMapsDirections } from "@/utils/maps";
+import { useStationFilters } from "@/store/stationFilters";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function MapScreen() {
-  const { data, coords, filters } = useNearbyStations();
-  const stations = useMemo(() => (data?.items?.length ? data.items : demoStations.filter((station) => stationMatchesMode(station, filters.mode))).slice(0, 40), [data?.items, filters.mode]);
-  const [selected, setSelected] = useState<Station | null>(stations[0] ?? null);
-  const [showList, setShowList] = useState(false);
-
-  useEffect(() => {
-    if (!selected && stations.length > 0) setSelected(stations[0]);
-  }, [selected, stations]);
+  const { data } = useNearbyStations();
+  const filters = useStationFilters();
+  const referenceStationName = "Statiq MLCP Noida Sec-18 Charging Hub";
+  const referenceStationMeta = "Near DLF Mall of India, Sector 18, Noida · 1.2 km";
+  const displayCoords = { latitude: 28.567, longitude: 77.321 };
+  const stations = useMemo(() => (data?.items?.length ? data.items : demoStations.filter((station) => stationMatchesMode(station, filters.mode))).slice(0, 15), [data?.items, filters.mode]);
+  const [selectedId, setSelectedId] = useState(stations[0]?.id ?? demoStations[0].id);
+  const featured = stations.find((station) => station.id === selectedId) ?? stations[0] ?? demoStations[0];
 
   return (
-    <View style={{ flex: 1, backgroundColor: fx.bg }}>
-      <StationMap coords={coords} stations={stations} onSelect={setSelected} />
+    <FxScreen scroll={false} style={{ backgroundColor: "#f7f9fd" }}>
+      <View style={{ flex: 1 }}>
+        <TopChromeBar title="15 stations around Noida" subtitle="" showBack={true} />
 
-      <View style={{ position: "absolute", top: 18, left: 16, right: 16, gap: 10 }}>
-        <View style={{ alignItems: "flex-end" }}>
-          <HeaderLogoBadge compact />
+        <View style={styles.searchRow}>
+          <Pressable accessibilityRole="button" onPress={() => router.push("/search")} style={styles.searchMain}>
+            <Ionicons name="search-outline" size={19} color="#8d99ab" />
+            <Text style={styles.searchText}>Search this area</Text>
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Open filters" onPress={() => router.push("/filters")} style={styles.searchFilterButton}>
+            <Ionicons name="options-outline" size={20} color="#fff" />
+          </Pressable>
         </View>
-        <SearchBar placeholder="Search this area" onPress={() => router.push("/search")} rightOnPress={() => router.push("/filters")} />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 9 }}>
-          <Pill label="Map" icon="map-outline" selected={!showList} onPress={() => setShowList(false)} />
-          <Pill label="List" icon="list-outline" selected={showList} onPress={() => setShowList(true)} />
-          <ModePill label="All EV" icon="layers-outline" selected={filters.mode === "all"} onPress={() => filters.setMode("all")} />
-          <ModePill label="Shubh Power" icon="flash-outline" selected={filters.mode === "shubh"} onPress={() => filters.setMode("shubh")} />
-          <ModePill label="Private Hub" icon="business-outline" selected={filters.mode === "private"} onPress={() => filters.setMode("private")} />
-          <Pill label="Fast DC" icon="flash-outline" selected={filters.minPowerKw >= 25} />
-          <Pill label={filters.connectorType} selected={filters.compatibleOnly} onPress={filters.toggleCompatibleOnly} />
-          <Pill label="Filters" icon="options-outline" onPress={() => router.push("/filters")} />
-        </ScrollView>
-      </View>
 
-      <View style={{ position: "absolute", right: 16, bottom: selected ? 255 : 112, gap: 10 }}>
-        <CircleButton icon="locate-outline" label="Recenter" onPress={() => setSelected(stations[0] ?? null)} />
-        <CircleButton icon="layers-outline" label="Layers" onPress={() => setShowList((value) => !value)} />
-      </View>
+        <View style={styles.mapWrap}>
+          <StationMap
+            coords={displayCoords}
+            stations={stations}
+            onSelect={(station) => setSelectedId(station.id)}
+            onLocate={() => setSelectedId(stations[0]?.id ?? demoStations[0].id)}
+            onOpenFilters={() => router.push("/filters")}
+          />
 
-      {showList ? (
-        <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, maxHeight: 360, backgroundColor: "#08223f", borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 16, gap: 10, borderWidth: 1, borderColor: "rgba(89,210,254,0.35)" }}>
-          <View style={{ width: 42, height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.24)", alignSelf: "center" }} />
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Text style={{ color: "#fff", fontWeight: "900" }}>{stations.length} stations nearby</Text>
-            <Pressable onPress={() => setShowList(false)}><Text style={{ color: fx.blue, fontWeight: "900" }}>Map view</Text></Pressable>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
-            {stations.slice(0, 5).map((station) => (
-              <Pressable key={station.id} onPress={() => { setSelected(station); setShowList(false); }} style={{ width: 230, borderRadius: 16, borderWidth: 1, borderColor: "rgba(89,210,254,0.35)", backgroundColor: "#fff", padding: 14, gap: 8 }}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 8 }}>
-                  <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}>
-                    {station.isShubhHub || /shu?bh/i.test(`${station.brand} ${station.name}`) ? <Image source={require("../../assets/shubh-power-mark.png")} resizeMode="contain" style={{ width: 20, height: 20 }} /> : null}
-                    <Text numberOfLines={2} style={{ color: fx.ink, fontWeight: "900", flex: 1 }}>{station.name}</Text>
+          <View style={styles.stationCardWrap}>
+            <Pressable accessibilityRole="button" onPress={() => router.push(`/station/${featured.id}`)} style={styles.stationCard}>
+              <View style={styles.stationBadge}>
+                <Text style={styles.stationBadgeText}>S</Text>
+              </View>
+              <View style={{ flex: 1, gap: 5 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Text numberOfLines={1} style={styles.stationName}>{referenceStationName}</Text>
+                </View>
+                <Text numberOfLines={1} style={styles.stationMeta}>{referenceStationMeta}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                  <View style={styles.metaPill}>
+                    <Ionicons name="flash-outline" size={12} color="#2b3444" />
+                    <Text style={styles.metaPillText}>60 kW</Text>
                   </View>
-                  <Text style={{ color: fx.blue, fontWeight: "900" }}>Rs {station.pricePerKwh ?? 18}</Text>
+                  <View style={styles.metaPill}>
+                    <Text style={styles.metaPillText}>₹18.25/kWh</Text>
+                  </View>
+                  <View style={{ flex: 1 }} />
+                  <View style={styles.chargeSurePill}>
+                    <Text style={styles.chargeSureText}>96 ChargeSure</Text>
+                  </View>
+                  <View style={styles.stationArrow}>
+                    <Ionicons name="chevron-forward" size={20} color="#146ddf" />
+                  </View>
                 </View>
-                <Text style={{ color: fx.muted, fontSize: 12 }}>{station.area || station.brand}</Text>
-                <View style={{ flexDirection: "row", gap: 7, flexWrap: "wrap" }}>
-                  {(station.connectorDetails?.slice(0, 2) ?? []).map((item) => <Pill key={item.id} label={item.type} selected />)}
-                  <Pill label={station.availabilityLabel || "4 free"} tone="teal" selected />
+                <View style={styles.stationStatsRow}>
+                  <StatItem icon="checkmark-circle-outline" label="4/6 available" selected />
                 </View>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-      ) : selected ? (
-        <View style={{ position: "absolute", left: 16, right: 16, bottom: 18, backgroundColor: "#fff", borderRadius: 20, padding: 16, gap: 12, borderWidth: 1, borderColor: fx.sky }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: fx.ink, fontSize: 20, lineHeight: 24, fontWeight: "900" }} numberOfLines={2}>{selected.name}</Text>
-              <Text style={{ color: fx.muted, fontWeight: "800" }}>{selected.brand} - {distanceLabel(selected)}</Text>
-            </View>
-            <View style={{ borderRadius: 999, borderWidth: 1, borderColor: fx.teal, backgroundColor: `${fx.teal}13`, paddingHorizontal: 10, paddingVertical: 7, alignSelf: "flex-start" }}>
-              <Text style={{ color: fx.teal, fontWeight: "900", fontSize: 12 }}>{selected.availabilityLabel || "Charging available"}</Text>
-            </View>
-          </View>
-          <Text style={{ color: fx.ink, fontWeight: "900" }}>Connector details updating - Tariff updates at station</Text>
-          <View style={{ flexDirection: "row", gap: 12 }}>
-            <View style={{ flex: 1 }}>
-              <Cta label="Details" onPress={() => router.push(`/station/${selected.id}`)} />
-            </View>
-            <Pressable accessibilityRole="button" accessibilityLabel="Open maps" onPress={() => void openGoogleMapsDirections(selected)} style={{ width: 58, height: 52, borderRadius: 15, borderWidth: 1, borderColor: fx.blue, alignItems: "center", justifyContent: "center" }}>
-              <Ionicons name="navigate-outline" size={24} color={fx.blue} />
+              </View>
             </Pressable>
           </View>
         </View>
-      ) : null}
-    </View>
+      </View>
+    </FxScreen>
   );
 }
 
@@ -103,11 +87,145 @@ function stationMatchesMode(station: { stationCategory?: string; isPrivateHub?: 
   return station.stationCategory === "shubh" || station.isShubhHub || /shu?bh/i.test(`${station.brand} ${station.name}`);
 }
 
-function ModePill({ label, icon, selected, onPress }: { label: string; icon: keyof typeof Ionicons.glyphMap; selected: boolean; onPress: () => void }) {
+function StatItem({ icon, label, selected = false }: { icon: keyof typeof Ionicons.glyphMap; label: string; selected?: boolean }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={{ minHeight: 36, borderRadius: 18, borderWidth: 1, borderColor: selected ? fx.navy : "rgba(22,143,226,0.32)", backgroundColor: selected ? fx.navy : "rgba(255,255,255,0.92)", paddingHorizontal: 13, flexDirection: "row", alignItems: "center", gap: 6 }}>
-      <Ionicons name={icon} size={15} color={selected ? "#fff" : fx.teal} />
-      <Text style={{ color: selected ? "#fff" : fx.muted, fontSize: 13, fontWeight: "900" }}>{label}</Text>
-    </Pressable>
+    <View style={styles.statItem}>
+      <Ionicons name={icon} size={13} color={selected ? "#17a95a" : "#2d3444"} />
+      <Text style={[styles.statItemText, selected && { color: "#17a95a" }]}>{label}</Text>
+    </View>
   );
 }
+
+const styles = {
+  searchRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingTop: 8
+  },
+  searchMain: {
+    flex: 1,
+    minHeight: 50,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#d6e1ec",
+    backgroundColor: "#fff",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 10,
+    paddingHorizontal: 14
+  },
+  searchText: {
+    color: "#6f7b8d",
+    fontSize: 13,
+    fontWeight: "500" as const
+  },
+  searchFilterButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: fx.blue,
+    alignItems: "center" as const,
+    justifyContent: "center" as const
+  },
+  mapWrap: {
+    flex: 1,
+    marginTop: 4,
+    marginHorizontal: 0,
+    position: "relative" as const
+  },
+  stationCardWrap: {
+    position: "absolute" as const,
+    left: 12,
+    right: 12,
+    bottom: 10
+  },
+  stationCard: {
+    minHeight: 102,
+    borderRadius: 18,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#dde6ef",
+    padding: 12,
+    flexDirection: "row" as const,
+    gap: 10,
+    shadowColor: "#0b1b33",
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4
+  },
+  stationBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#7a4df0",
+    alignItems: "center" as const,
+    justifyContent: "center" as const
+  },
+  stationBadgeText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900" as const
+  },
+  stationName: {
+    color: fx.ink,
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: "900" as const
+  },
+  stationMeta: {
+    color: "#8c96a9",
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: "700" as const
+  },
+  metaPill: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4
+  },
+  metaPillText: {
+    color: "#2b3444",
+    fontSize: 11,
+    fontWeight: "700" as const
+  },
+  chargeSurePill: {
+    backgroundColor: "#e6fbef",
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignSelf: "flex-start" as const,
+    marginTop: 1
+  },
+  chargeSureText: {
+    color: "#11a85b",
+    fontSize: 10,
+    fontWeight: "900" as const
+  },
+  stationArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#eef6ff",
+    alignItems: "center" as const,
+    justifyContent: "center" as const
+  },
+  stationStatsRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 14,
+    flexWrap: "wrap" as const
+  },
+  statItem: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4
+  },
+  statItemText: {
+    color: "#2b3444",
+    fontSize: 11,
+    fontWeight: "700" as const
+  }
+};

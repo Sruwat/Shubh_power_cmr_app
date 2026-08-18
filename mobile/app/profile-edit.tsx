@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import { api } from "@/api/client";
-import { BackHeader, Cta, fx, FxCard, FxInput, FxScreen, Pill } from "@/components/Futuristic";
+import { Cta, fx, FxCard, FxInput, FxScreen, Pill } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 import { useAuthStore } from "@/store/auth";
 
 export default function ProfileEdit() {
@@ -45,7 +46,7 @@ export default function ProfileEdit() {
 
   return (
     <FxScreen>
-      <BackHeader title="Edit Profile" onBack={() => router.back()} />
+      <TopChromeBar title="Edit profile" subtitle="" />
       <FxCard style={{ backgroundColor: fx.navy }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
           <View style={{ width: 68, height: 68, borderRadius: 24, backgroundColor: fx.teal, alignItems: "center", justifyContent: "center" }}>

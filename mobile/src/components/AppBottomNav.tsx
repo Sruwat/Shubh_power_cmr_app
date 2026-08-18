@@ -10,7 +10,7 @@ const tabs: Array<{ key: TabKey; label: string; icon: keyof typeof Ionicons.glyp
   { key: "home", label: "Home", icon: "home-outline", href: "/(tabs)" },
   { key: "map", label: "Map", icon: "map-outline", href: "/(tabs)/map" },
   { key: "scan", label: "Scan", icon: "qr-code-outline", href: "/(tabs)/scan" },
-  { key: "activity", label: "Activity", icon: "pulse-outline", href: "/(tabs)/activity" },
+  { key: "activity", label: "Pay", icon: "card-outline", href: "/(tabs)/activity" },
   { key: "profile", label: "Profile", icon: "person-outline", href: "/(tabs)/profile" }
 ];
 
@@ -39,10 +39,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     flexDirection: "row",
     borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopColor: "#d7eefb",
+    backgroundColor: "rgba(255,255,255,0.98)",
     paddingTop: spacing.sm,
-    paddingHorizontal: spacing.sm
+    paddingHorizontal: spacing.sm,
+    shadowColor: "#0b1b33",
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: -4 },
+    elevation: 18
   },
   item: { flex: 1, alignItems: "center", justifyContent: "center", gap: 2, minHeight: 54 },
   label: { color: colors.body, fontSize: type.tab, fontWeight: "800" },

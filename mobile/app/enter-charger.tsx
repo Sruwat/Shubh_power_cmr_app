@@ -1,13 +1,14 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import { Text } from "react-native";
-import { BackHeader, Cta, fx, FxCard, FxInput, FxScreen } from "@/components/Futuristic";
+import { Cta, fx, FxCard, FxInput, FxScreen } from "@/components/Futuristic";
+import { TopChromeBar } from "@/components/ShubhShell";
 
 export default function EnterCharger() {
   const [chargerId, setChargerId] = useState("");
   return (
     <FxScreen>
-      <BackHeader title="Enter Charger ID" onBack={() => router.back()} />
+      <TopChromeBar title="Enter charger ID" subtitle="" />
       <FxCard>
         <Text style={{ color: fx.ink, fontSize: 24, fontWeight: "900" }}>Enter Charger ID</Text>
         <Text style={{ color: fx.muted, lineHeight: 22 }}>Find the ID on the charger unit label or the station display board.</Text>

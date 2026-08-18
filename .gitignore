@@ -8,4 +8,9 @@ mobile/.env
 mobile/node_modules/
 mobile/dist-check/
 mobile/.expo/
+mobile/.gradle-fresh/
+mobile/android/.gradle/
+mobile/android/.kotlin/
+mobile/android/build/
+mobile/android/app/build/
 *.pyc

@@ -6,7 +6,7 @@ import { importedStationFallback, withPresentation } from "@/data/presentation";
 import { StationFilterState, useStationFilters } from "@/store/stationFilters";
 
 function stationMatchesMode(station: Station, mode: "shubh" | "all" | "private") {
-  if (mode === "all") return true;
+  if (mode === "all") return !(station.stationCategory === "shubh" || station.isShubhHub === true || /shu?bh/i.test(`${station.brand} ${station.name}`));
   if (mode === "private") return station.stationCategory === "private" || station.isPrivateHub === true || Boolean(station.societyName);
   return station.stationCategory === "shubh" || station.isShubhHub === true || /shu?bh/i.test(`${station.brand} ${station.name}`);
 }
