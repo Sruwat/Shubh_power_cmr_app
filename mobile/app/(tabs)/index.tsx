@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Image, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StationMap } from "@/components/StationMap";
 import { fx, FxScreen, Pill } from "@/components/Futuristic";
 import { stations as demoStations } from "@/data/experience";
@@ -13,14 +14,16 @@ import shubhMark from "../../assets/shubh-power-mark.png";
 export default function Home() {
   const { data } = useNearbyStations();
   const { height, width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const filters = useStationFilters();
   const carouselRef = useRef<ScrollView | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const referenceStationMeta = "Near DLF Mall of India, Sector 18, Noida · 1.2 km";
   const displayCoords = { latitude: 28.567, longitude: 77.321 };
   const topHeight = Math.max(156, Math.round(height * 0.15));
-  const bottomHeight = Math.min(170, Math.max(144, Math.round(height * 0.14)));
-  const mapHeight = Math.max(352, Math.round(height - topHeight - bottomHeight - 84));
+  const footerReserve = Math.max(118, Math.round(insets.bottom + 108));
+  const mapHeight = Math.max(352, Math.round(height - topHeight - footerReserve - 20));
+  const stationCardBottom = Math.max(0, Math.round(insets.bottom - 6));
   const stations = useMemo(() => {
     const source = data?.items?.length ? data.items : demoStations;
     const q = searchQuery.trim().toLowerCase();
@@ -69,11 +72,16 @@ export default function Home() {
             </Pressable>
           </View>
 
-          <View style={styles.pillRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            nestedScrollEnabled
+            contentContainerStyle={styles.pillRow}
+          >
             <Pill label="All Ev" icon="shield-checkmark-outline" selected={filters.mode === "all"} tone="blue" onPress={() => filters.setMode("all")} />
             <Pill label="Shubh Power Charger" icon="flash-outline" selected={filters.mode === "shubh"} tone="teal" onPress={() => filters.setMode("shubh")} />
             <Pill label="Ev private charging hub" icon="cash-outline" selected={filters.mode === "private"} tone="amber" onPress={() => filters.setMode("private")} />
-          </View>
+          </ScrollView>
         </View>
 
         <View style={[styles.mapWrap, { height: mapHeight }]}>
@@ -85,7 +93,7 @@ export default function Home() {
             onOpenFilters={() => router.push("/filters")}
           />
 
-          <View style={styles.stationCardWrap}>
+          <View style={[styles.stationCardWrap, { bottom: stationCardBottom }]}>
             <ScrollView
               ref={carouselRef}
               horizontal
@@ -137,13 +145,6 @@ export default function Home() {
           </View>
         </View>
 
-        <View style={[styles.quickActionsSection, { height: bottomHeight }]}>
-          <View style={styles.quickActionsWrap}>
-            <QuickAction title="Plan journey" subtitle="Plan A + backup" icon="navigate-outline" onPress={() => router.push("/trip-plan")} />
-            <QuickAction title="QueuePass" subtitle="Skip uncertainty" icon="time-outline" onPress={() => router.push("/queuepass")} />
-            <QuickAction title="Rescue" subtitle="Urgent help" icon="medkit-outline" onPress={() => router.push("/rescue")} />
-          </View>
-        </View>
       </View>
     </FxScreen>
   );
@@ -161,18 +162,6 @@ function StatItem({ icon, label, selected = false }: { icon: keyof typeof Ionico
       <Ionicons name={icon} size={13} color={selected ? "#17a95a" : "#2d3444"} />
       <Text style={[styles.statItemText, selected && { color: "#17a95a" }]}>{label}</Text>
     </View>
-  );
-}
-
-function QuickAction({ title, subtitle, icon, onPress }: { title: string; subtitle: string; icon: keyof typeof Ionicons.glyphMap; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.quickActionCard}>
-      <View style={styles.quickActionIconWrap}>
-        <Ionicons name={icon} size={20} color={fx.blue} />
-      </View>
-      <Text style={styles.quickActionTitle}>{title}</Text>
-      <Text style={styles.quickActionSubtitle}>{subtitle}</Text>
-    </Pressable>
   );
 }
 
@@ -241,7 +230,9 @@ const styles = {
     flexDirection: "row" as const,
     gap: 8,
     paddingHorizontal: 16,
-    paddingTop: 2
+    paddingTop: 2,
+    paddingRight: 28,
+    alignItems: "center" as const
   },
   mapWrap: {
     flex: 0,
@@ -252,8 +243,7 @@ const styles = {
   stationCardWrap: {
     position: "absolute" as const,
     left: 12,
-    right: 12,
-    bottom: 8
+    right: 12
   },
   carouselContent: {
     paddingHorizontal: 12,
@@ -345,53 +335,6 @@ const styles = {
     color: fx.muted,
     fontSize: 10,
     fontWeight: "800" as const
-  },
-  quickActionsSection: {
-    paddingHorizontal: 12,
-    paddingTop: 4,
-    paddingBottom: 6,
-    justifyContent: "flex-start" as const
-  },
-  quickActionsWrap: {
-    flexDirection: "row" as const,
-    gap: 8,
-    alignItems: "stretch" as const
-  },
-  quickActionCard: {
-    flex: 1,
-    minHeight: 86,
-    borderRadius: 16,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#dde6ef",
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    gap: 6,
-    shadowColor: "#0b1b33",
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2
-  },
-  quickActionIconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 12,
-    backgroundColor: "#e9f1ff",
-    alignItems: "center" as const,
-    justifyContent: "center" as const
-  },
-  quickActionTitle: {
-    color: fx.ink,
-    fontSize: 11,
-    fontWeight: "900" as const,
-    textAlign: "center" as const
-  },
-  quickActionSubtitle: {
-    color: fx.muted,
-    fontSize: 10,
-    fontWeight: "700" as const,
-    textAlign: "center" as const
   },
   statItem: {
     flexDirection: "row" as const,
