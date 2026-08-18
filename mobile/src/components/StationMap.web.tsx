@@ -3,6 +3,7 @@ import { Station } from "@/api/client";
 import { colors } from "@/design-system/tokens";
 
 export function StationMap({
+  selectedStationId,
   stations,
   onSelect,
   onLocate,
@@ -10,6 +11,7 @@ export function StationMap({
 }: {
   coords: { latitude: number; longitude: number };
   stations: Station[];
+  selectedStationId?: string;
   onSelect: (station: Station) => void;
   onLocate?: () => void;
   onOpenFilters?: () => void;

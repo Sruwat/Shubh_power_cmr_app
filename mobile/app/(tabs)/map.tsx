@@ -38,6 +38,7 @@ export default function MapScreen() {
           <StationMap
             coords={displayCoords}
             stations={stations}
+            selectedStationId={selectedId}
             onSelect={(station) => setSelectedId(station.id)}
             onLocate={() => setSelectedId(stations[0]?.id ?? demoStations[0].id)}
             onOpenFilters={() => router.push("/filters")}
