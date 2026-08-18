@@ -16,7 +16,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#f2f7fc"
     },
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "android": {
       "package": "com.shubhpower.evcharging",
       "permissions": [
